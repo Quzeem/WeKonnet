@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const logger = require('morgan');
 const colors = require('colors');
+const errorHandler = require('./middlewares/errorHandler');
 const connectDB = require('./config/database');
 
 // Load enviroment variables
@@ -26,6 +27,9 @@ if (process.env.NODE_ENV === 'development') {
 
 // Mount routers
 app.use('/api/v1/auth', auth);
+
+// Custom Error Handler
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
