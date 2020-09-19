@@ -13,6 +13,7 @@
     "no-console": "off",
     "comma-dangle": "off",
     "no-useless-escape": "off",
+    "func-names": "off",
     "linebreak-style": ["warn", "windows"]
   }
 }
