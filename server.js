@@ -2,9 +2,16 @@ const express = require('express');
 const dotenv = require('dotenv');
 const logger = require('morgan');
 const colors = require('colors');
+const connectDB = require('./config/database');
 
 // Load enviroment variables
 dotenv.config({ path: './config/config.env' });
+
+// Connect to database
+connectDB();
+
+// Route files
+const auth = require('./routes/auth');
 
 // Express application
 const app = express();
@@ -17,12 +24,22 @@ if (process.env.NODE_ENV === 'development') {
   app.use(logger('dev'));
 }
 
+// Mount routers
+app.use('/api/v1/auth', auth);
+
 const PORT = process.env.PORT || 3000;
 
-app.listen(
+const server = app.listen(
   PORT,
   console.log(
     `Server is running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow
       .bold
   )
 );
+
+// Global handler for unhandled promise rejections
+process.on('unhandledRejection', (err, promise) => {
+  console.log(`Error: ${err.message}`.red);
+  // Close server & exit process with failure
+  server.close(() => process.exit(1));
+});
