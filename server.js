@@ -14,6 +14,7 @@ connectDB();
 // Route files
 const auth = require('./routes/auth');
 const members = require('./routes/members');
+const organizations = require('./routes/organizations');
 
 // Express application
 const app = express();
@@ -28,7 +29,8 @@ if (process.env.NODE_ENV === 'development') {
 
 // Mount routers
 app.use('/api/v1/auth', auth);
-app.use(members);
+app.use('/api/v1/members', members);
+app.use('/api/v1/organizations', organizations);
 
 // Custom Error Handler
 app.use(errorHandler);

@@ -7,17 +7,10 @@ const {
   deleteMember,
 } = require('../controllers/members');
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
-router
-  .route('/api/v1/organizations/:organizationId/members')
-  .get(getMembers)
-  .post(createMember);
+router.route('/:organizationId/members').get(getMembers).post(createMember);
 
-router
-  .route('/api/v1/members/:id')
-  .get(getMember)
-  .put(updateMember)
-  .delete(deleteMember);
+router.route('/:id').get(getMember).put(updateMember).delete(deleteMember);
 
 module.exports = router;

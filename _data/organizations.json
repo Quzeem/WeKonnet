@@ -1,0 +1,29 @@
+[
+  {
+    "_id": "5f6333d056011508d813814c",
+    "name": "Tagopia Connect",
+    "username": "Tagopia",
+    "email": "tagopia@gmail.com",
+    "address": "5 Pawling Way",
+    "phone": "375-652-8944",
+    "password": "123456"
+  },
+  {
+    "_id": "5f634be3d7f84d2bf0aaed14",
+    "name": "Aivee & Co",
+    "username": "Aivee",
+    "email": "aivee@gmail.com",
+    "address": "07281 Springview Point",
+    "phone": "833-495-3315",
+    "password": "123456"
+  },
+  {
+    "_id": "5f663165fff5d319d831d9df",
+    "name": "Crownstar",
+    "username": "Crown",
+    "email": "crown@gmail.com",
+    "address": "07281 Creeks Metro",
+    "phone": "833-495-0202",
+    "password": "123456"
+  }
+]
