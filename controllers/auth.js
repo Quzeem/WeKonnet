@@ -1,6 +1,7 @@
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middlewares/asyncHandler');
 const Organization = require('../models/Organization');
+const Member = require('../models/Member');
 
 // @desc      Register Organization
 // @route     POST /api/v1/auth/register
@@ -10,10 +11,10 @@ exports.register = asyncHandler(async (req, res, next) => {
   res.status(201).json({ success: true, data: organization });
 });
 
-// @desc      Login
+// @desc      Login Organization
 // @route     POST /api/v1/auth/organizations/login
 // @access    Public
-exports.login = asyncHandler(async (req, res, next) => {
+exports.loginOrganization = asyncHandler(async (req, res, next) => {
   const { username, password } = req.body;
 
   // Validate email & password
@@ -35,6 +36,35 @@ exports.login = asyncHandler(async (req, res, next) => {
 
   // check if password matches
   if (organization.password !== password) {
+    return next(new ErrorResponse('Invalid credentials', 401));
+  }
+
+  return res.status(200).json({ success: true });
+});
+
+// @desc      Login Member
+// @route     POST /api/v1/auth/members/login
+// @access    Public
+exports.loginMember = asyncHandler(async (req, res, next) => {
+  const { phone, password } = req.body;
+
+  // Validate email & password
+  if (!phone || !password) {
+    return next(
+      new ErrorResponse('Please provide a phone number and password', 400)
+    );
+  }
+
+  // Check if member exists
+  const member = await Member.findOne({ phone }).select('+password');
+
+  // Validate member
+  if (!member) {
+    return next(new ErrorResponse('Invalid credentials', 401));
+  }
+
+  // check if password matches
+  if (member.password !== password) {
     return next(new ErrorResponse('Invalid credentials', 401));
   }
 
