@@ -3,13 +3,15 @@ const mongoose = require('mongoose');
 const OrganizationSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Please add a name'],
+    match: [/^[a-zA-Z][a-zA-Z\s]*$/, 'Please add a valid name'],
     trim: true,
     unique: true,
+    required: [true, 'Please add a name'],
     maxlength: [50, 'Name can not be nore than 50 characters'],
   },
   username: {
     type: String,
+    match: [/^[a-z][a-z]+\d*$|^[a-z]\d\d+$/i, 'Please a valid username'],
     required: [true, 'Please add a username'],
     unique: true,
     trim: true,

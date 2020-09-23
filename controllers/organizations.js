@@ -6,13 +6,7 @@ const Organization = require('../models/Organization');
 // @route     GET /api/v1/organizations
 // @access    Private/Super Admin
 exports.getOrganizations = asyncHandler(async (req, res, next) => {
-  const organizations = await Organization.find();
-
-  res.status(200).json({
-    success: true,
-    count: organizations.length,
-    data: organizations,
-  });
+  res.status(200).json(res.advancedResults);
 });
 
 // @desc      Get an organization

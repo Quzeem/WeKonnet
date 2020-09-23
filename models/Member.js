@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const MemberSchema = new mongoose.Schema({
   fullname: {
     type: String,
+    match: [/^[a-zA-Z][a-zA-Z\s]*$/, 'Please add a valid name'],
     trim: true,
     required: [true, 'Please add a fullname'],
   },

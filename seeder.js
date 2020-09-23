@@ -7,7 +7,7 @@ const Organization = require('./models/Organization');
 const Member = require('./models/Member');
 
 // Load env vars
-dotenv.config({ path: 'config/config.env' });
+dotenv.config({ path: './config/config.env' });
 
 // Read data
 const members = JSON.parse(

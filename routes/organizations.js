@@ -7,6 +7,9 @@ const {
   deleteOrganization,
 } = require('../controllers/organizations');
 
+const Organization = require('../models/Organization');
+const advancedQuery = require('../middlewares/advancedQuery');
+
 // Members Router
 const membersRouter = require('./members');
 
@@ -15,7 +18,10 @@ const router = express.Router();
 // Re-route into members router
 router.use('/', membersRouter);
 
-router.route('/').get(getOrganizations).post(createOrganization);
+router
+  .route('/')
+  .get(advancedQuery(Organization), getOrganizations)
+  .post(createOrganization);
 
 router
   .route('/:id')
