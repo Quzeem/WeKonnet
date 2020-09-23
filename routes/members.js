@@ -9,7 +9,7 @@ const {
 
 const router = express.Router({ mergeParams: true });
 
-router.route('/:organizationId/members').get(getMembers).post(createMember);
+router.route('/').get(getMembers).post(createMember);
 
 router.route('/:id').get(getMember).put(updateMember).delete(deleteMember);
 

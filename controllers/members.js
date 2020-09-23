@@ -9,6 +9,9 @@ const Organization = require('../models/Organization');
 exports.getMembers = asyncHandler(async (req, res, next) => {
   const members = await Member.find({
     organization: req.params.organizationId,
+  }).populate({
+    path: 'organization',
+    select: 'name email address',
   });
 
   res.status(200).json({

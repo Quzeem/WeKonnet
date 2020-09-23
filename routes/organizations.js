@@ -10,17 +10,17 @@ const {
 const Organization = require('../models/Organization');
 const advancedQuery = require('../middlewares/advancedQuery');
 
-// Members Router
-const membersRouter = require('./members');
-
 const router = express.Router();
 
+// Include members router
+const memberRouter = require('./members');
+
 // Re-route into members router
-router.use('/', membersRouter);
+router.use('/:organizationId/members', memberRouter);
 
 router
   .route('/')
-  .get(advancedQuery(Organization), getOrganizations)
+  .get(advancedQuery(Organization, 'members'), getOrganizations)
   .post(createOrganization);
 
 router

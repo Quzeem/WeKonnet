@@ -41,7 +41,7 @@ exports.createOrganization = asyncHandler(async (req, res, next) => {
 });
 
 // @desc      Update organization
-// @route     PUT /api/organizations/:id
+// @route     PUT /api/v1/organizations/:id
 // @access    Private/Super Admin
 exports.updateOrganization = asyncHandler(async (req, res, next) => {
   const organization = await Organization.findByIdAndUpdate(
@@ -67,10 +67,10 @@ exports.updateOrganization = asyncHandler(async (req, res, next) => {
 });
 
 // @desc      Delete organization
-// @route     DELETE /api/organizations/:id
+// @route     DELETE /api/v1/organizations/:id
 // @access    Private/Super Admin
 exports.deleteOrganization = asyncHandler(async (req, res, next) => {
-  const organization = await Organization.findByIdAndDelete(req.params.id);
+  const organization = await Organization.findById(req.params.id);
 
   if (!organization) {
     return next(
@@ -78,6 +78,8 @@ exports.deleteOrganization = asyncHandler(async (req, res, next) => {
       404
     );
   }
+  // Trigger cascade delete of members associated with this bootcamp
+  organization.remove();
 
   return res.status(200).json({
     success: true,

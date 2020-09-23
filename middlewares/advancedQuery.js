@@ -1,5 +1,3 @@
-const mongoose = require('mongoose');
-
 const advancedQuery = (model, populate) => async (req, res, next) => {
   let query;
 
