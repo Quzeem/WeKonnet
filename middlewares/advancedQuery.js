@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const advancedQuery = (model, populate) => async (req, res, next) => {
   let query;
 
@@ -14,7 +16,20 @@ const advancedQuery = (model, populate) => async (req, res, next) => {
   const queryStr = JSON.stringify(reqQuery);
 
   // Finding resource
-  query = model.find(JSON.parse(queryStr));
+  if (model === mongoose.model('Organization')) {
+    query = model.find(JSON.parse(queryStr));
+  } else if (model === mongoose.model('Member')) {
+    if (req.params.organizationId.match(/^[0-9a-fA-F]{24}$/)) {
+      query = model.find({
+        organization: req.params.organizationId,
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        error: `Organization with the ID: ${req.params.organizationId} not found`,
+      });
+    }
+  }
 
   // Select Fields
   if (req.query.select) {

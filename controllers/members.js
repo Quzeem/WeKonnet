@@ -7,18 +7,7 @@ const Organization = require('../models/Organization');
 // @route     GET /api/v1/organizations/:organizationId/members
 // @access    Private
 exports.getMembers = asyncHandler(async (req, res, next) => {
-  const members = await Member.find({
-    organization: req.params.organizationId,
-  }).populate({
-    path: 'organization',
-    select: 'name email address',
-  });
-
-  res.status(200).json({
-    success: true,
-    count: members.length,
-    data: members,
-  });
+  res.status(200).json(res.advancedResults);
 });
 
 // @desc      Get a member

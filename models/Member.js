@@ -13,6 +13,8 @@ const MemberSchema = new mongoose.Schema({
       /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
       'Please add a valid email',
     ],
+    trim: true,
+    lowercase: true,
     unique: true,
   },
   phone: {
@@ -23,10 +25,12 @@ const MemberSchema = new mongoose.Schema({
   },
   professionalSkills: {
     type: String,
+    trim: true,
     maxlength: [100, 'Description can not be more than 100 characters'],
   },
   gender: {
     type: String,
+    lowercase: true,
     enum: ['male', 'female', 'prefer not to say'],
   },
   photo: {
@@ -43,7 +47,13 @@ const MemberSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Please add a password'],
-    minlength: 6,
+    trim: true,
+    minlength: [6, 'Password must be atleast six characters'],
+    validate(value) {
+      if (value.toLowerCase().includes('password')) {
+        throw new Error('Password cannot contain "password"');
+      }
+    },
     select: false,
   },
   resetPasswordToken: String,

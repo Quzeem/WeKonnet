@@ -16,7 +16,7 @@ const OrganizationSchema = new mongoose.Schema(
       required: [true, 'Please add a username'],
       unique: true,
       trim: true,
-      minlength: 2,
+      minlength: [2, 'Username must be atleast two characters'],
     },
     email: {
       type: String,
@@ -25,6 +25,8 @@ const OrganizationSchema = new mongoose.Schema(
         /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
         'Please add a valid email',
       ],
+      trim: true,
+      lowercase: true,
       unique: true,
     },
     address: {
@@ -46,7 +48,13 @@ const OrganizationSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, 'Please add a password'],
-      minlength: 6,
+      trim: true,
+      minlength: [6, 'Password must be atleast six characters'],
+      validate(value) {
+        if (value.toLowerCase().includes('password')) {
+          throw new Error('Password cannot contain "password"');
+        }
+      },
       select: false,
     },
     resetPasswordToken: String,
