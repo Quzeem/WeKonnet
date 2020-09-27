@@ -34,9 +34,12 @@ exports.getOrganization = asyncHandler(async (req, res, next) => {
 exports.createOrganization = asyncHandler(async (req, res, next) => {
   const organization = await Organization.create(req.body);
 
-  return res.status(200).json({
+  // Create token
+  const token = organization.getSignedJwtToken();
+
+  return res.status(201).json({
     success: true,
-    data: organization,
+    token,
   });
 });
 

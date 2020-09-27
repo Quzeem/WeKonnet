@@ -8,7 +8,14 @@ const Member = require('../models/Member');
 // @access    Public
 exports.register = asyncHandler(async (req, res, next) => {
   const organization = await Organization.create(req.body);
-  res.status(201).json({ success: true, data: organization });
+
+  // Create token
+  const token = organization.getSignedJwtToken();
+
+  return res.status(200).json({
+    success: true,
+    token,
+  });
 });
 
 // @desc      Login Organization

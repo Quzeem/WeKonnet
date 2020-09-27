@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const generator = require('generate-password');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const MemberSchema = new mongoose.Schema(
   {
@@ -94,5 +95,16 @@ MemberSchema.pre('save', async function (next) {
   }
   next();
 });
+
+// Return signed JWT token
+MemberSchema.methods.getSignedJwtToken = function () {
+  return jwt.sign(
+    { id: this._id, organization: this.organization },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRES,
+    }
+  );
+};
 
 module.exports = mongoose.model('Member', MemberSchema);

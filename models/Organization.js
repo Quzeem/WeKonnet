@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const OrganizationSchema = new mongoose.Schema(
   {
@@ -77,6 +78,13 @@ OrganizationSchema.pre('save', async function (next) {
   }
   next();
 });
+
+// Return signed JWT token
+OrganizationSchema.methods.getSignedJwtToken = function () {
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES,
+  });
+};
 
 // Cascade delete members of an organization removed from DB
 OrganizationSchema.pre('remove', async function (next) {

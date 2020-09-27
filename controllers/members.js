@@ -48,11 +48,15 @@ exports.createMember = asyncHandler(async (req, res, next) => {
     );
   }
 
+  // Create member
   const member = await Member.create(req.body);
 
-  return res.status(200).json({
+  // Create token
+  const token = member.getSignedJwtToken();
+
+  return res.status(201).json({
     success: true,
-    data: member,
+    token,
   });
 });
 
