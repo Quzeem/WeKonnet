@@ -78,7 +78,7 @@ exports.deleteOrganization = asyncHandler(async (req, res, next) => {
       404
     );
   }
-  // Trigger cascade delete of members associated with this bootcamp
+  // Trigger cascade delete of members associated with this organization
   organization.remove();
 
   return res.status(200).json({

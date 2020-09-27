@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const OrganizationSchema = new mongoose.Schema(
   {
@@ -59,20 +60,31 @@ const OrganizationSchema = new mongoose.Schema(
     },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
   },
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    timestamps: true,
   }
 );
 
+// Hash password
+OrganizationSchema.pre('save', async function (next) {
+  const organization = this;
+  if (organization.isModified('password')) {
+    const salt = await bcrypt.genSalt(10);
+    organization.password = await bcrypt.hash(organization.password, salt);
+  }
+  next();
+});
+
 // Cascade delete members of an organization removed from DB
 OrganizationSchema.pre('remove', async function (next) {
-  await this.model('Member').deleteMany({ organization: this._id });
+  const organization = this;
+  await organization
+    .model('Member')
+    .deleteMany({ organization: organization._id });
+  next();
 });
 
 // Reverse populate with virtuals

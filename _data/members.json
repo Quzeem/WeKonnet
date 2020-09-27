@@ -1,39 +1,39 @@
 [
   {
     "_id": "5f6388cd74698d2b1c4aa3a0",
-    "fullname": "Kosemani Abiola",
+    "firstname": "Abiola",
+    "lastname": "Kosemani",
     "phone": "07022222470",
-    "password": "123456",
     "organization": "5f634be3d7f84d2bf0aaed14"
   },
   {
     "_id": "5f63892174698d2b1c4aa3a1",
-    "fullname": "Quzeem Agbaje",
+    "firstname": "Quzeem",
+    "lastname": "Agbaje",
     "phone": "08022226311",
-    "password": "123456",
     "email": "zeemag@gmail.com",
     "organization": "5f634be3d7f84d2bf0aaed14"
   },
   {
     "_id": "5f63898674698d2b1c4aa3a2",
-    "fullname": "Job Ugbem",
+    "firstname": "Job",
+    "lastname": "Ugbem",
     "phone": "08022224668",
-    "password": "123456",
     "email": "job@gmail.com",
     "organization": "5f6333d056011508d813814c"
   },
   {
     "_id": "5f6389cc74698d2b1c4aa3a3",
-    "fullname": "Athan Marley",
+    "firstname": "Marley",
+    "lastname": "Athan",
     "phone": "08022221111",
-    "password": "123456",
     "organization": "5f6333d056011508d813814c"
   },
   {
     "_id": "5f66358038df4223a4c83db8",
-    "fullname": "Mark Henry",
+    "firstname": "Mark",
+    "lastname": "Henry",
     "phone": "09033333472",
-    "password": "123456",
     "organization": "5f663165fff5d319d831d9df"
   }
 ]
