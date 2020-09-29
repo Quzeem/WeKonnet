@@ -7,13 +7,13 @@ const MemberSchema = new mongoose.Schema(
   {
     firstname: {
       type: String,
-      match: [/^[a-zA-Z][a-zA-Z\s]*$/, 'Please add a valid firstname'],
+      match: [/^[a-zA-Z][a-zA-Z\s]*$/, 'Name can only contain alphabets'],
       trim: true,
       required: [true, 'Please add a firstname'],
     },
     lastname: {
       type: String,
-      match: [/^[a-zA-Z][a-zA-Z\s]*$/, 'Please add a valid lastname'],
+      match: [/^[a-zA-Z][a-zA-Z\s]*$/, 'Name can only contain alphabets'],
       trim: true,
       required: [true, 'Please add a lastname'],
     },
@@ -48,7 +48,12 @@ const MemberSchema = new mongoose.Schema(
       default: 'no-photo.jpg',
     },
     stateOfOrigin: String,
-    address: String,
+    location: {
+      address: String,
+      state: String,
+      city: String,
+      country: String,
+    },
     role: {
       type: String,
       enum: ['member', 'admin'],
@@ -66,12 +71,14 @@ const MemberSchema = new mongoose.Schema(
       select: false,
     },
     resetPasswordToken: String,
-    resetPasswordExpire: Date,
-    organization: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Organization',
-      required: true,
-    },
+    resetPasswordExpires: Date,
+    organizations: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Organization',
+        required: true,
+      },
+    ],
   },
   {
     timestamps: true,
@@ -79,32 +86,43 @@ const MemberSchema = new mongoose.Schema(
 );
 
 MemberSchema.pre('save', function (next) {
-  if (!this.email) {
-    this.email = `${this.firstname}${this.phone.slice(-4)}@domain.com`;
+  const member = this;
+  if (!member.email) {
+    member.email = `${member.firstname}${member.phone.slice(-4)}@domain.com`;
   }
-  if (!this.password) {
-    this.password = generator.generate({ length: 10, numbers: true });
+  if (!member.password) {
+    member.password = generator.generate({ length: 10, numbers: true });
   }
   next();
 });
 
 MemberSchema.pre('save', async function (next) {
-  if (this.isModified('password')) {
+  const member = this;
+  if (member.isModified('password')) {
     const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+    member.password = await bcrypt.hash(member.password, salt);
   }
   next();
 });
 
+// Password Verification
+MemberSchema.methods.verifyPassword = async function (enteredPassword) {
+  const member = this;
+  const verify = await bcrypt.compare(enteredPassword, member.password);
+  return verify;
+};
+
 // Return signed JWT token
-MemberSchema.methods.getSignedJwtToken = function () {
-  return jwt.sign(
-    { id: this._id, organization: this.organization },
+MemberSchema.methods.getAuthToken = async function () {
+  const member = this;
+  const token = jwt.sign(
+    { _id: member._id.toString() },
     process.env.JWT_SECRET,
     {
       expiresIn: process.env.JWT_EXPIRES,
     }
   );
+  return token;
 };
 
 module.exports = mongoose.model('Member', MemberSchema);

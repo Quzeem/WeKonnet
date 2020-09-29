@@ -3,24 +3,29 @@ const asyncHandler = require('../middlewares/asyncHandler');
 const Organization = require('../models/Organization');
 const Member = require('../models/Member');
 
-// @desc      Register Organization
-// @route     POST /api/v1/auth/register
-// @access    Public
+/**
+ * @description Register Organization
+ * @route POST /api/v1/auth/register
+ * @access Public
+ */
 exports.register = asyncHandler(async (req, res, next) => {
   const organization = await Organization.create(req.body);
 
   // Create token
-  const token = organization.getSignedJwtToken();
+  const token = await organization.getAuthToken();
 
   return res.status(200).json({
     success: true,
+    data: organization,
     token,
   });
 });
 
-// @desc      Login Organization
-// @route     POST /api/v1/auth/organizations/login
-// @access    Public
+/**
+ * @description Login Organization
+ * @route POST /api/v1/auth/organizations/login
+ * @access Public
+ */
 exports.loginOrganization = asyncHandler(async (req, res, next) => {
   const { username, password } = req.body;
 
@@ -36,22 +41,28 @@ exports.loginOrganization = asyncHandler(async (req, res, next) => {
     '+password'
   );
 
-  // Validate organization
   if (!organization) {
     return next(new ErrorResponse('Invalid credentials', 401));
   }
 
-  // check if password matches
-  if (organization.password !== password) {
+  // Verify password
+  const isMatch = await organization.verifyPassword(password);
+
+  if (!isMatch) {
     return next(new ErrorResponse('Invalid credentials', 401));
   }
 
-  return res.status(200).json({ success: true });
+  // Create token
+  const token = await organization.getAuthToken();
+
+  return res.status(200).json({ success: true, data: organization, token });
 });
 
-// @desc      Login Member
-// @route     POST /api/v1/auth/members/login
-// @access    Public
+/**
+ * @description Login Member
+ * @route POST /api/v1/auth/members/login
+ * @access Public
+ */
 exports.loginMember = asyncHandler(async (req, res, next) => {
   const { phone, password } = req.body;
 
@@ -70,10 +81,15 @@ exports.loginMember = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Invalid credentials', 401));
   }
 
-  // check if password matches
-  if (member.password !== password) {
+  // Verify password
+  const isMatch = await member.verifyPassword(password);
+
+  if (!isMatch) {
     return next(new ErrorResponse('Invalid credentials', 401));
   }
 
-  return res.status(200).json({ success: true });
+  // Create token
+  const token = await member.getAuthToken();
+
+  return res.status(200).json({ success: true, data: member, token });
 });

@@ -6,15 +6,21 @@ const OrganizationSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      match: [/^[a-zA-Z][a-zA-Z\s]*$/, 'Please add a valid name'],
-      trim: true,
+      match: [
+        /^[a-zA-Z][a-zA-Z\s]*$/,
+        'Name can only contain alphabets and spaces',
+      ],
       unique: true,
+      trim: true,
       required: [true, 'Please add a name'],
       maxlength: [50, 'Name can not be nore than 50 characters'],
     },
     username: {
       type: String,
-      match: [/^[a-z][a-z]+\d*$|^[a-z]\d\d+$/i, 'Please a valid username'],
+      match: [
+        /^[a-z][a-z]+\d*$|^[a-z]\d\d+$/i,
+        'Username can only be alpha-numeric characters and numbers in the username have to be at the end.',
+      ],
       required: [true, 'Please add a username'],
       unique: true,
       trim: true,
@@ -31,9 +37,23 @@ const OrganizationSchema = new mongoose.Schema(
       lowercase: true,
       unique: true,
     },
-    address: {
-      type: String,
-      required: [true, 'Please add an address'],
+    location: {
+      address: {
+        type: String,
+        required: [true, 'Please add an address'],
+      },
+      state: {
+        type: String,
+        required: [true, 'Please add a state'],
+      },
+      city: {
+        type: String,
+        required: [true, 'Please add a city'],
+      },
+      country: {
+        type: String,
+        required: [true, 'Please add a country'],
+      },
     },
     phone: {
       type: String,
@@ -69,7 +89,7 @@ const OrganizationSchema = new mongoose.Schema(
   }
 );
 
-// Hash password
+// Hash text plain password
 OrganizationSchema.pre('save', async function (next) {
   const organization = this;
   if (organization.isModified('password')) {
@@ -79,11 +99,24 @@ OrganizationSchema.pre('save', async function (next) {
   next();
 });
 
+// Password Verification
+OrganizationSchema.methods.verifyPassword = async function (enteredPassword) {
+  const organization = this;
+  const verify = await bcrypt.compare(enteredPassword, organization.password);
+  return verify;
+};
+
 // Return signed JWT token
-OrganizationSchema.methods.getSignedJwtToken = function () {
-  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES,
-  });
+OrganizationSchema.methods.getAuthToken = async function () {
+  const organization = this;
+  const token = jwt.sign(
+    { _id: organization._id.toString() },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRES,
+    }
+  );
+  return token;
 };
 
 // Cascade delete members of an organization removed from DB
@@ -91,7 +124,11 @@ OrganizationSchema.pre('remove', async function (next) {
   const organization = this;
   await organization
     .model('Member')
-    .deleteMany({ organization: organization._id });
+    .updateMany(
+      { organizations: organization._id },
+      { $pull: { organizations: organization._id } },
+      { multi: true }
+    );
   next();
 });
 
@@ -99,7 +136,7 @@ OrganizationSchema.pre('remove', async function (next) {
 OrganizationSchema.virtual('members', {
   ref: 'Member',
   localField: '_id',
-  foreignField: 'organization',
+  foreignField: 'organizations',
   justOne: false,
 });
 

@@ -3,18 +3,26 @@ const asyncHandler = require('../middlewares/asyncHandler');
 const Member = require('../models/Member');
 const Organization = require('../models/Organization');
 
-// @desc      Get all members
-// @route     GET /api/v1/organizations/:organizationId/members
-// @access    Private
+/**
+ * @description Get all members
+ * @route GET /api/v1/organizations/:organizationId/members
+ * @access Private (organization & members)
+ */
 exports.getMembers = asyncHandler(async (req, res, next) => {
   res.status(200).json(res.advancedResults);
 });
 
-// @desc      Get a member
-// @route     GET /api/v1/members/:id
-// @access    Private
+/**
+ * @description Get a member
+ * @route GET /api/v1/organizations/:organizationId/members/:memberId
+ * @access Private (organization & members)
+ */
 exports.getMember = asyncHandler(async (req, res, next) => {
-  const member = await Member.findById(req.params.id);
+  // const member = await Member.findById(req.params.id);
+  const member = await Member.findOne({
+    _id: req.params.memberId,
+    organizations: { $in: [req.params.organizationId] },
+  });
 
   if (!member) {
     return next(
@@ -29,13 +37,12 @@ exports.getMember = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc      Add new member
-// @route     POST /api/v1/organizations/:organizationId/members
-// @access    Private
+/**
+ * @description Add a new member
+ * @route POST /api/v1/organizations/:organizationId/members
+ * @access Private (organization)
+ */
 exports.createMember = asyncHandler(async (req, res, next) => {
-  // Add organizationId to member data coming from req.body
-  req.body.organization = req.params.organizationId;
-
   // Check if organization exists
   const organization = await Organization.findById(req.params.organizationId);
 
@@ -48,51 +55,69 @@ exports.createMember = asyncHandler(async (req, res, next) => {
     );
   }
 
-  // Create member
-  const member = await Member.create(req.body);
+  try {
+    // Create member
+    req.body.organizations = [req.params.organizationId];
 
-  // Create token
-  const token = member.getSignedJwtToken();
+    const member = await Member.create(req.body);
 
-  return res.status(201).json({
-    success: true,
-    token,
-  });
+    return res.status(201).json({
+      success: true,
+      data: member,
+    });
+  } catch (err) {
+    if (err.code === 11000) {
+      let member = await Member.findOne({
+        phone: req.body.phone,
+        organizations: req.params.organizationId,
+      });
+
+      if (!member) {
+        member = await Member.findOneAndUpdate(
+          { phone: req.body.phone },
+          { $addToSet: { organizations: req.params.organizationId } },
+          { new: true }
+        );
+
+        return res.status(201).json({
+          success: true,
+          data: member,
+        });
+      }
+
+      return next(
+        new ErrorResponse(
+          `Member with the ID: ${member._id} already exists`,
+          403
+        )
+      );
+    }
+  }
 });
 
-// @desc      Update Member
-// @route     PUT /api/members/:id
-// @access    Private
-exports.updateMember = asyncHandler(async (req, res, next) => {
-  const member = await Member.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
+/**
+ * @description Delete member
+ * @route DELETE /api/v1/members/:memberId
+ * @access Private (organization)
+ */
+exports.deleteMember = asyncHandler(async (req, res, next) => {
+  const member = await Member.findByIdAndUpdate(
+    req.params.memberId,
+    {
+      $pull: { organizations: req.query.organizationId },
+    },
+    { new: true }
+  );
 
   if (!member) {
     return next(
-      new ErrorResponse(`Member with the ID: ${req.params.id} not found`),
+      new ErrorResponse(`Member with the ID: ${req.params.memberId} not found`),
       404
     );
   }
 
-  return res.status(200).json({
-    success: true,
-    data: member,
-  });
-});
-
-// @desc      Delete Member
-// @route     DELETE /api/members/:id
-// @access    Private
-exports.deleteMember = asyncHandler(async (req, res, next) => {
-  const member = await Member.findByIdAndDelete(req.params.id);
-
-  if (!member) {
-    return next(
-      new ErrorResponse(`Member with the ID: ${req.params.id} not found`),
-      404
-    );
+  if (member.organizations.length === 0) {
+    await member.remove();
   }
 
   return res.status(200).json({

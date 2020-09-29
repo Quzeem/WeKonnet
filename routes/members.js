@@ -3,7 +3,6 @@ const {
   getMembers,
   getMember,
   createMember,
-  updateMember,
   deleteMember,
 } = require('../controllers/members');
 
@@ -17,12 +16,12 @@ router
   .get(
     advancedQuery(Member, {
       path: 'organization',
-      select: 'name email address',
+      select: 'name',
     }),
     getMembers
   )
   .post(createMember);
 
-router.route('/:id').get(getMember).put(updateMember).delete(deleteMember);
+router.route('/:memberId').get(getMember).delete(deleteMember);
 
 module.exports = router;

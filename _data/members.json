@@ -4,7 +4,13 @@
     "firstname": "Abiola",
     "lastname": "Kosemani",
     "phone": "07022222470",
-    "organization": "5f634be3d7f84d2bf0aaed14"
+    "location": {
+      "address": "No man's land",
+      "state": "Lagos",
+      "city": "Lekki",
+      "country": "Nigeria"
+    },
+    "organizations": "5f634be3d7f84d2bf0aaed14"
   },
   {
     "_id": "5f63892174698d2b1c4aa3a1",
@@ -12,7 +18,8 @@
     "lastname": "Agbaje",
     "phone": "08022226311",
     "email": "zeemag@gmail.com",
-    "organization": "5f634be3d7f84d2bf0aaed14"
+    "organizations": "5f634be3d7f84d2bf0aaed14",
+    "password": "zeemag"
   },
   {
     "_id": "5f63898674698d2b1c4aa3a2",
@@ -20,20 +27,27 @@
     "lastname": "Ugbem",
     "phone": "08022224668",
     "email": "job@gmail.com",
-    "organization": "5f6333d056011508d813814c"
+    "organizations": "5f6333d056011508d813814c",
+    "password": "jobzil"
   },
   {
     "_id": "5f6389cc74698d2b1c4aa3a3",
     "firstname": "Marley",
     "lastname": "Athan",
     "phone": "08022221111",
-    "organization": "5f6333d056011508d813814c"
+    "location": {
+      "address": "No man's land",
+      "state": "Lagos",
+      "city": "Lekki",
+      "country": "Nigeria"
+    },
+    "organizations": "5f6333d056011508d813814c"
   },
   {
     "_id": "5f66358038df4223a4c83db8",
     "firstname": "Mark",
     "lastname": "Henry",
     "phone": "09033333472",
-    "organization": "5f663165fff5d319d831d9df"
+    "organizations": "5f663165fff5d319d831d9df"
   }
 ]

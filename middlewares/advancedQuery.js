@@ -21,7 +21,7 @@ const advancedQuery = (model, populate) => async (req, res, next) => {
   } else if (model === mongoose.model('Member')) {
     if (req.params.organizationId.match(/^[0-9a-fA-F]{24}$/)) {
       query = model.find({
-        organization: req.params.organizationId,
+        organizations: req.params.organizationId,
       });
     } else {
       return res.status(400).json({

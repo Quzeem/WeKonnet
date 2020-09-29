@@ -4,7 +4,12 @@
     "name": "Tagopia Connect",
     "username": "Tagopia",
     "email": "tagopia@gmail.com",
-    "address": "5 Pawling Way",
+    "location": {
+      "address": "07281 Abraham Close",
+      "state": "Lagos",
+      "city": "Lekki",
+      "country": "Nigeria"
+    },
     "phone": "375-652-8944",
     "password": "123456"
   },
@@ -13,7 +18,12 @@
     "name": "Aivee and Co",
     "username": "Aivee",
     "email": "aivee@gmail.com",
-    "address": "07281 Springview Point",
+    "location": {
+      "address": "07281 Springview Point",
+      "state": "Lagos",
+      "city": "Lekki",
+      "country": "Nigeria"
+    },
     "phone": "833-495-3315",
     "password": "123456"
   },
@@ -22,7 +32,12 @@
     "name": "Crownstar",
     "username": "Crown",
     "email": "crown@gmail.com",
-    "address": "07281 Creeks Metro",
+    "location": {
+      "address": "07281 Creeks Metro",
+      "state": "Lagos",
+      "city": "Lekki",
+      "country": "Nigeria"
+    },
     "phone": "833-495-0202",
     "password": "123456"
   }
