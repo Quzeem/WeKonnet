@@ -3,6 +3,7 @@ const asyncHandler = require('./asyncHandler');
 const ErrorResponse = require('../utils/errorResponse');
 const Organization = require('../models/Organization');
 const Member = require('../models/Member');
+const Admin = require('../models/Admin');
 
 exports.auth = asyncHandler(async (req, res, next) => {
   //  Get token from req.cookies
@@ -30,6 +31,10 @@ exports.auth = asyncHandler(async (req, res, next) => {
       const member = await Member.findById(decoded._id);
       req.user = member;
       next();
+    } else if (decoded.role === 'admin') {
+      const admin = await Admin.findById(decoded._id);
+      req.user = admin;
+      next();
     } else {
       return next(
         new ErrorResponse('You are not authorized to access this route', 401)
@@ -50,7 +55,7 @@ exports.authorize = (...roles) => (req, res, next) => {
   if (!roles.includes(req.user.role)) {
     return next(
       new ErrorResponse(
-        `${req.user.role} not authorized to access this route`,
+        `User with the role of '${req.user.role}' not authorized to access this route`,
         401
       )
     );

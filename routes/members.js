@@ -18,18 +18,18 @@ router.use(auth);
 router
   .route('/')
   .get(
-    authorize('organization', 'member'),
+    authorize('admin', 'organization', 'member'),
     advancedQuery(Member, {
       path: 'organization',
       select: 'name',
     }),
     getMembers
   )
-  .post(authorize('organization'), createMember);
+  .post(authorize('admin', 'organization'), createMember);
 
 router
   .route('/:memberId')
-  .get(authorize('organization', 'member'), getMember)
-  .delete(authorize('organization'), deleteMember);
+  .get(authorize('admin', 'organization', 'member'), getMember)
+  .delete(authorize('admin', 'organization'), deleteMember);
 
 module.exports = router;

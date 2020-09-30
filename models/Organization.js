@@ -89,6 +89,19 @@ const OrganizationSchema = new mongoose.Schema(
   }
 );
 
+// Delete some fiels from data to return to the client
+OrganizationSchema.methods.toJSON = function () {
+  const organization = this;
+  const organizationObject = organization.toObject();
+
+  delete organizationObject.password;
+  delete organizationObject.createdAt;
+  delete organizationObject.updatedAt;
+  delete organizationObject.id;
+
+  return organizationObject;
+};
+
 // Hash text plain password
 OrganizationSchema.pre('save', async function (next) {
   const organization = this;

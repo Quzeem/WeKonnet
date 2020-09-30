@@ -2,14 +2,15 @@ const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middlewares/asyncHandler');
 const Organization = require('../models/Organization');
 const Member = require('../models/Member');
+const Admin = require('../models/Admin');
 const sendToken = require('../utils/sendToken');
 
 /**
  * @description Register Organization
- * @route POST /api/v1/auth/register
+ * @route POST /api/v1/auth/organizations/register
  * @access Public
  */
-exports.register = asyncHandler(async (req, res, next) => {
+exports.registerOrganization = asyncHandler(async (req, res, next) => {
   const organization = await Organization.create(req.body);
 
   return sendToken(organization, 201, res);
@@ -23,7 +24,7 @@ exports.register = asyncHandler(async (req, res, next) => {
 exports.loginOrganization = asyncHandler(async (req, res, next) => {
   const { username, password } = req.body;
 
-  // Validate email & password
+  // Validate username & password
   if (!username || !password) {
     return next(
       new ErrorResponse('Please provide a username and password', 400)
@@ -57,7 +58,7 @@ exports.loginOrganization = asyncHandler(async (req, res, next) => {
 exports.loginMember = asyncHandler(async (req, res, next) => {
   const { phone, password } = req.body;
 
-  // Validate email & password
+  // Validate phone & password
   if (!phone || !password) {
     return next(
       new ErrorResponse('Please provide a phone number and password', 400)
@@ -93,4 +94,47 @@ exports.logout = asyncHandler(async (req, res, next) => {
     httpOnly: true,
   });
   res.sendStatus(204);
+});
+
+/**
+ * @description Register an Admin
+ * @route POST /api/v1/auth/admins/register
+ * @access Private
+ */
+exports.registerAdmin = asyncHandler(async (req, res, next) => {
+  const admin = await Admin.create(req.body);
+
+  return sendToken(admin, 201, res);
+});
+
+/**
+ * @description Login Admin
+ * @route POST /api/v1/auth/admins/login
+ * @access Private
+ */
+exports.loginAdmin = asyncHandler(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  // Validate email & password
+  if (!email || !password) {
+    return next(
+      new ErrorResponse('Please provide a username and password', 400)
+    );
+  }
+
+  // Check if admin exists
+  const admin = await Admin.findOne({ email }).select('+password');
+
+  if (!admin) {
+    return next(new ErrorResponse('Invalid credentials', 401));
+  }
+
+  // Verify password
+  const isMatch = await admin.verifyPassword(password);
+
+  if (!isMatch) {
+    return next(new ErrorResponse('Invalid credentials', 401));
+  }
+
+  return sendToken(admin, 200, res);
 });

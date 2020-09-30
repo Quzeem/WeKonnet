@@ -96,6 +96,19 @@ MemberSchema.pre('save', function (next) {
   next();
 });
 
+// Delete some fiels from data to return to the client
+MemberSchema.methods.toJSON = function () {
+  const member = this;
+  const memberObject = member.toObject();
+
+  delete memberObject.password;
+  delete memberObject.createdAt;
+  delete memberObject.updatedAt;
+
+  return memberObject;
+};
+
+// Hash text plain password
 MemberSchema.pre('save', async function (next) {
   const member = this;
   if (member.isModified('password')) {
