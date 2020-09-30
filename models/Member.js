@@ -116,7 +116,7 @@ MemberSchema.methods.verifyPassword = async function (enteredPassword) {
 MemberSchema.methods.getAuthToken = async function () {
   const member = this;
   const token = jwt.sign(
-    { _id: member._id.toString() },
+    { _id: member._id.toString(), role: this.role },
     process.env.JWT_SECRET,
     {
       expiresIn: process.env.JWT_EXPIRES,

@@ -110,7 +110,7 @@ OrganizationSchema.methods.verifyPassword = async function (enteredPassword) {
 OrganizationSchema.methods.getAuthToken = async function () {
   const organization = this;
   const token = jwt.sign(
-    { _id: organization._id.toString() },
+    { _id: organization._id.toString(), role: this.role },
     process.env.JWT_SECRET,
     {
       expiresIn: process.env.JWT_EXPIRES,

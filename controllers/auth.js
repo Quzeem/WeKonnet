@@ -2,6 +2,7 @@ const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middlewares/asyncHandler');
 const Organization = require('../models/Organization');
 const Member = require('../models/Member');
+const sendToken = require('../utils/sendToken');
 
 /**
  * @description Register Organization
@@ -11,14 +12,7 @@ const Member = require('../models/Member');
 exports.register = asyncHandler(async (req, res, next) => {
   const organization = await Organization.create(req.body);
 
-  // Create token
-  const token = await organization.getAuthToken();
-
-  return res.status(200).json({
-    success: true,
-    data: organization,
-    token,
-  });
+  return sendToken(organization, 201, res);
 });
 
 /**
@@ -52,10 +46,7 @@ exports.loginOrganization = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Invalid credentials', 401));
   }
 
-  // Create token
-  const token = await organization.getAuthToken();
-
-  return res.status(200).json({ success: true, data: organization, token });
+  return sendToken(organization, 200, res);
 });
 
 /**
@@ -88,8 +79,18 @@ exports.loginMember = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Invalid credentials', 401));
   }
 
-  // Create token
-  const token = await member.getAuthToken();
+  return sendToken(member, 200, res);
+});
 
-  return res.status(200).json({ success: true, data: member, token });
+/**
+ * @description Logout
+ * @route POST /api/v1/auth/logout
+ * @access Public
+ */
+exports.logout = asyncHandler(async (req, res, next) => {
+  res.cookie('token', '', {
+    expires: new Date(Date.now() + 1 * 1000),
+    httpOnly: true,
+  });
+  res.sendStatus(204);
 });
