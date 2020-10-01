@@ -235,9 +235,6 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   }
 });
 
-// @desc    Reset password
-// @route   PUT /api/v1/auth/resetpassword/:resettoken
-// @access  Public
 /**
  * @description Reset password
  * @route PUT /api/v1/members/resetpassword/:resettoken
@@ -250,7 +247,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
     .update(req.params.resettoken)
     .digest('hex');
 
-  // find a user with the resetPasswordToken in the DB
+  // find a member with the resetPasswordToken in the DB
   const member = await Member.findOne({
     resetPasswordToken,
     resetPasswordExpires: { $gt: Date.now() },
@@ -263,8 +260,8 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
   // else
   member.password = req.body.password;
   member.resetPasswordToken = undefined;
-  member.resetPasswordExpire = undefined;
+  member.resetPasswordExpires = undefined;
   await member.save();
 
-  sendToken(member, 200, res);
+  return sendToken(member, 200, res);
 });

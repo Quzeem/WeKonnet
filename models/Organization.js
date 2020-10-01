@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -130,6 +131,26 @@ OrganizationSchema.methods.getAuthToken = async function () {
     }
   );
   return token;
+};
+
+// Generate and hash password reset token
+OrganizationSchema.methods.getResetPasswordToken = function () {
+  const organization = this;
+
+  // Generate token
+  const resetToken = crypto.randomBytes(20).toString('hex');
+
+  // Hash the resetToken and set it to resetPasswordToken field
+  organization.resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  // Set when the token will expire (10mins)
+  organization.resetPasswordExpires = Date.now() + 10 * 60 * 1000;
+
+  // return original reset token
+  return resetToken;
 };
 
 // Cascade delete members of an organization removed from DB
