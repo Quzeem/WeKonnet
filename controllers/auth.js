@@ -84,19 +84,6 @@ exports.loginMember = asyncHandler(async (req, res, next) => {
 });
 
 /**
- * @description Logout
- * @route POST /api/v1/auth/logout
- * @access Public
- */
-exports.logout = asyncHandler(async (req, res, next) => {
-  res.cookie('token', '', {
-    expires: new Date(Date.now() + 1 * 1000),
-    httpOnly: true,
-  });
-  res.sendStatus(204);
-});
-
-/**
  * @description Register an Admin
  * @route POST /api/v1/auth/admins/register
  * @access Private
@@ -137,4 +124,17 @@ exports.loginAdmin = asyncHandler(async (req, res, next) => {
   }
 
   return sendToken(admin, 200, res);
+});
+
+/**
+ * @description Logout
+ * @route POST /api/v1/auth/logout
+ * @access Public
+ */
+exports.logout = asyncHandler(async (req, res, next) => {
+  res.cookie('token', '', {
+    expires: new Date(Date.now() + 1 * 1000),
+    httpOnly: true,
+  });
+  res.sendStatus(204);
 });

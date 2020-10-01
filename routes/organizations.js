@@ -3,6 +3,9 @@ const {
   getOrganizations,
   getOrganization,
   deleteOrganization,
+  getLoggedInOrganization,
+  updateOrganizationDetails,
+  updateOrganizationPassword,
 } = require('../controllers/organizations');
 
 const Organization = require('../models/Organization');
@@ -19,10 +22,30 @@ router.use('/:organizationId/members', memberRouter);
 
 // Use auth middleware in all routes
 router.use(auth);
-router.use(authorize('admin'));
 
-router.route('/').get(advancedQuery(Organization, 'members'), getOrganizations);
+router
+  .route('/')
+  .get(
+    authorize('admin'),
+    advancedQuery(Organization, 'members'),
+    getOrganizations
+  );
 
-router.route('/:id').get(getOrganization).delete(deleteOrganization);
+router.get('/me', authorize('organization'), getLoggedInOrganization);
+router.put(
+  '/updatedetails',
+  authorize('organization'),
+  updateOrganizationDetails
+);
+router.put(
+  '/updatepassword',
+  authorize('organization'),
+  updateOrganizationPassword
+);
+
+router
+  .route('/:id')
+  .get(authorize('admin'), getOrganization)
+  .delete(authorize('admin'), deleteOrganization);
 
 module.exports = router;

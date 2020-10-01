@@ -2,6 +2,7 @@ const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middlewares/asyncHandler');
 const Member = require('../models/Member');
 const Organization = require('../models/Organization');
+const sendToken = require('../utils/sendToken');
 
 /**
  * @description Get all members
@@ -124,4 +125,59 @@ exports.deleteMember = asyncHandler(async (req, res, next) => {
     success: true,
     data: {},
   });
+});
+
+/**
+ * @description Get logged in member
+ * @route GET /api/v1/members/me
+ * @access Private (member)
+ */
+exports.getLoggedInMember = asyncHandler(async (req, res, next) => {
+  const member = await Member.findById(req.user._id);
+  res.status(200).json({ success: true, data: member });
+});
+
+/**
+ * @description Details update for logged in member
+ * @route PUT /api/v1/members/updatedetails
+ * @access Private (member)
+ */
+exports.updateMemberDetails = asyncHandler(async (req, res, next) => {
+  const fieldsToUpdate = {
+    firstname: req.body.firstname,
+    lastname: req.body.lastname,
+    email: req.body.email,
+    phone: req.body.phone,
+    professionalSkills: req.body.professionalSkills,
+    gender: req.body.gender,
+    stateOfOrigin: req.body.stateOfOrigin,
+    location: req.body.location,
+  };
+
+  const member = await Member.findByIdAndUpdate(req.user._id, fieldsToUpdate, {
+    new: true,
+    runValidators: true,
+  });
+
+  res.status(200).json({ success: true, data: member });
+});
+
+/**
+ * @description Password update for logged in member
+ * @route PUT /api/v1/members/updatepassword
+ * @access Private (member)
+ */
+exports.updateMemberPassword = asyncHandler(async (req, res, next) => {
+  const member = await Member.findById(req.user._id).select('+password');
+
+  // Check current password
+  if (!(await member.verifyPassword(req.body.currentPassword))) {
+    return next(new ErrorResponse('Incorrect password', 401));
+  }
+
+  // else
+  member.password = req.body.newPassword;
+  await member.save();
+
+  return sendToken(member, 200, res);
 });

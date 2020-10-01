@@ -1,6 +1,7 @@
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middlewares/asyncHandler');
 const Organization = require('../models/Organization');
+const sendToken = require('../utils/sendToken');
 
 /**
  * @description Get all organizations
@@ -53,4 +54,62 @@ exports.deleteOrganization = asyncHandler(async (req, res, next) => {
     success: true,
     data: {},
   });
+});
+
+/**
+ * @description Get logged in organization
+ * @route GET /api/v1/organizations/me
+ * @access Private (organization)
+ */
+exports.getLoggedInOrganization = asyncHandler(async (req, res, next) => {
+  const organization = await Organization.findById(req.user._id);
+  res.status(200).json({ success: true, data: organization });
+});
+
+/**
+ * @description Details update for logged in organization
+ * @route PUT /api/v1/organizations/updatedetails
+ * @access Private (organization)
+ */
+exports.updateOrganizationDetails = asyncHandler(async (req, res, next) => {
+  const fieldsToUpdate = {
+    name: req.body.name,
+    username: req.body.username,
+    email: req.body.email,
+    location: req.body.location,
+    phone: req.body.phone,
+  };
+
+  const organization = await Organization.findByIdAndUpdate(
+    req.user._id,
+    fieldsToUpdate,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  res.status(200).json({ success: true, data: organization });
+});
+
+/**
+ * @description Password update for logged in organization
+ * @route PUT /api/v1/organizations/updatepassword
+ * @access Private (organization)
+ */
+exports.updateOrganizationPassword = asyncHandler(async (req, res, next) => {
+  const organization = await Organization.findById(req.user._id).select(
+    '+password'
+  );
+
+  // Check current password
+  if (!(await organization.verifyPassword(req.body.currentPassword))) {
+    return next(new ErrorResponse('Incorrect password', 401));
+  }
+
+  // else
+  organization.password = req.body.newPassword;
+  await organization.save();
+
+  return sendToken(organization, 200, res);
 });

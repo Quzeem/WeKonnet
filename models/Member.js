@@ -56,7 +56,6 @@ const MemberSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['member', 'admin'],
       default: 'member',
     },
     password: {

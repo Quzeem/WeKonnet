@@ -4,6 +4,9 @@ const {
   getMember,
   createMember,
   deleteMember,
+  getLoggedInMember,
+  updateMemberDetails,
+  updateMemberPassword,
 } = require('../controllers/members');
 
 const Member = require('../models/Member');
@@ -26,6 +29,10 @@ router
     getMembers
   )
   .post(authorize('admin', 'organization'), createMember);
+
+router.get('/me', authorize('member'), getLoggedInMember);
+router.put('/updatedetails', authorize('member'), updateMemberDetails);
+router.put('/updatepassword', authorize('member'), updateMemberPassword);
 
 router
   .route('/:memberId')
