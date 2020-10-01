@@ -7,6 +7,8 @@ const {
   getLoggedInMember,
   updateMemberDetails,
   updateMemberPassword,
+  forgotPassword,
+  resetPassword,
 } = require('../controllers/members');
 
 const Member = require('../models/Member');
@@ -15,12 +17,10 @@ const { auth, authorize } = require('../middlewares/auth');
 
 const router = express.Router({ mergeParams: true });
 
-// Use auth middleware in all routes
-router.use(auth);
-
 router
   .route('/')
   .get(
+    auth,
     authorize('admin', 'organization', 'member'),
     advancedQuery(Member, {
       path: 'organization',
@@ -28,15 +28,17 @@ router
     }),
     getMembers
   )
-  .post(authorize('admin', 'organization'), createMember);
+  .post(auth, authorize('admin', 'organization'), createMember);
 
-router.get('/me', authorize('member'), getLoggedInMember);
-router.put('/updatedetails', authorize('member'), updateMemberDetails);
-router.put('/updatepassword', authorize('member'), updateMemberPassword);
+router.get('/me', auth, authorize('member'), getLoggedInMember);
+router.put('/updatedetails', auth, authorize('member'), updateMemberDetails);
+router.put('/updatepassword', auth, authorize('member'), updateMemberPassword);
+router.post('/forgotpassword', forgotPassword);
+router.put('/resetpassword/:resettoken', resetPassword);
 
 router
   .route('/:memberId')
-  .get(authorize('admin', 'organization', 'member'), getMember)
-  .delete(authorize('admin', 'organization'), deleteMember);
+  .get(auth, authorize('admin', 'organization', 'member'), getMember)
+  .delete(auth, authorize('admin', 'organization'), deleteMember);
 
 module.exports = router;

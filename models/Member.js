@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const generator = require('generate-password');
 const bcrypt = require('bcryptjs');
@@ -135,6 +136,26 @@ MemberSchema.methods.getAuthToken = async function () {
     }
   );
   return token;
+};
+
+// Generate and hash password reset token
+MemberSchema.methods.getResetPasswordToken = function () {
+  const member = this;
+
+  // Generate token
+  const resetToken = crypto.randomBytes(20).toString('hex');
+
+  // Hash the resetToken and set it to resetPasswordToken field
+  member.resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  // Set when the token will expire (10mins)
+  member.resetPasswordExpires = Date.now() + 10 * 60 * 1000;
+
+  // return original reset token
+  return resetToken;
 };
 
 module.exports = mongoose.model('Member', MemberSchema);
