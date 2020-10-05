@@ -4,6 +4,7 @@ const {
   getOrganization,
   deleteOrganization,
   getLoggedInOrganization,
+  avatarUpload,
   updateOrganizationDetails,
   updateOrganizationPassword,
   forgotPassword,
@@ -13,6 +14,7 @@ const {
 const Organization = require('../models/Organization');
 const advancedQuery = require('../middlewares/advancedQuery');
 const { auth, authorize } = require('../middlewares/auth');
+const upload = require('../middlewares/imageUpload');
 
 const router = express.Router();
 
@@ -32,6 +34,13 @@ router
   );
 
 router.get('/me', auth, authorize('organization'), getLoggedInOrganization);
+router.post(
+  '/avatar',
+  auth,
+  authorize('organization'),
+  upload.single('image'),
+  avatarUpload
+);
 router.put(
   '/updatedetails',
   auth,

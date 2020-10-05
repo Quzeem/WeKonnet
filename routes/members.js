@@ -5,6 +5,7 @@ const {
   createMember,
   deleteMember,
   getLoggedInMember,
+  avatarUpload,
   updateMemberDetails,
   updateMemberPassword,
   forgotPassword,
@@ -14,6 +15,7 @@ const {
 const Member = require('../models/Member');
 const advancedQuery = require('../middlewares/advancedQuery');
 const { auth, authorize } = require('../middlewares/auth');
+const upload = require('../middlewares/imageUpload');
 
 const router = express.Router({ mergeParams: true });
 
@@ -31,6 +33,13 @@ router
   .post(auth, authorize('admin', 'organization'), createMember);
 
 router.get('/me', auth, authorize('member'), getLoggedInMember);
+router.post(
+  '/avatar',
+  auth,
+  authorize('member'),
+  upload.single('image'),
+  avatarUpload
+);
 router.put('/updatedetails', auth, authorize('member'), updateMemberDetails);
 router.put('/updatepassword', auth, authorize('member'), updateMemberPassword);
 router.post('/forgotpassword', forgotPassword);

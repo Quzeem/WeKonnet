@@ -5,6 +5,7 @@ const colors = require('colors');
 const dotenv = require('dotenv');
 const Organization = require('./models/Organization');
 const Member = require('./models/Member');
+const Admin = require('./models/Admin');
 
 // Load env vars
 dotenv.config({ path: './config/config.env' });
@@ -15,6 +16,9 @@ const members = JSON.parse(
 );
 const organizations = JSON.parse(
   fs.readFileSync(path.join(__dirname, '_data', 'organizations.json'), 'utf-8')
+);
+const admins = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '_data', 'admins.json'), 'utf-8')
 );
 
 // Connect to DB
@@ -30,6 +34,7 @@ const importData = async () => {
   try {
     await Member.create(members);
     await Organization.create(organizations);
+    await Admin.create(admins);
     console.log('Data Imported'.green.inverse);
     process.exit();
   } catch (err) {
@@ -42,6 +47,7 @@ const DeleteData = async () => {
   try {
     await Member.deleteMany();
     await Organization.deleteMany();
+    await Admin.deleteMany();
     console.log('Data Deleted'.red.inverse);
     process.exit();
   } catch (err) {

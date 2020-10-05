@@ -5,12 +5,16 @@ const cookieParser = require('cookie-parser');
 const colors = require('colors');
 const errorHandler = require('./middlewares/errorHandler');
 const connectDB = require('./config/database');
+const { connectCloudinary } = require('./config/cloudinary');
 
 // Load enviroment variables
 dotenv.config({ path: './config/config.env' });
 
 // Connect to database
 connectDB();
+
+// Connect to cloudinary
+connectCloudinary();
 
 // Route files
 const auth = require('./routes/auth');

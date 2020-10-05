@@ -1,11 +1,13 @@
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middlewares/asyncHandler');
 const Organization = require('../models/Organization');
+const Member = require('../models/Member');
 const sendToken = require('../utils/sendToken');
 const {
   sendPasswordResetLink,
   changePassword,
 } = require('../utils/passwordReset');
+const uploadAvatar = require('../utils/uploadAvatar');
 
 /**
  * @description Get all organizations
@@ -53,6 +55,11 @@ exports.deleteOrganization = asyncHandler(async (req, res, next) => {
   }
   // Trigger cascade delete of members associated with this organization
   organization.remove();
+
+  // Delete members that doesn't belong to any organization
+  await Member.deleteMany({
+    organizations: { $size: 0 },
+  });
 
   return res.status(200).json({
     success: true,
@@ -134,4 +141,13 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
  */
 exports.resetPassword = asyncHandler(async (req, res, next) => {
   changePassword(Organization, req, res, next);
+});
+
+/**
+ * @description Avatar upload for organization
+ * @route POST /api/v1/organizations/avatar
+ * @access Private (member)
+ */
+exports.avatarUpload = asyncHandler(async (req, res, next) => {
+  uploadAvatar(req, res, next);
 });

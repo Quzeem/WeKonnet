@@ -1,3 +1,4 @@
+const generator = require('generate-password');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middlewares/asyncHandler');
 const Member = require('../models/Member');
@@ -7,6 +8,7 @@ const {
   sendPasswordResetLink,
   changePassword,
 } = require('../utils/passwordReset');
+const uploadAvatar = require('../utils/uploadAvatar');
 
 /**
  * @description Get all members
@@ -23,7 +25,6 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
  * @access Private (organization & members)
  */
 exports.getMember = asyncHandler(async (req, res, next) => {
-  // const member = await Member.findById(req.params.id);
   const member = await Member.findOne({
     _id: req.params.memberId,
     organizations: { $in: [req.params.organizationId] },
@@ -31,7 +32,7 @@ exports.getMember = asyncHandler(async (req, res, next) => {
 
   if (!member) {
     return next(
-      new ErrorResponse(`Member with the ID: ${req.params.id} not found`),
+      new ErrorResponse(`Member with the ID: ${req.params.memberId} not found`),
       404
     );
   }
@@ -61,8 +62,12 @@ exports.createMember = asyncHandler(async (req, res, next) => {
   }
 
   try {
-    // Create member
     req.body.organizations = [req.params.organizationId];
+
+    // default password
+    if (!req.body.password) {
+      req.body.password = generator.generate({ length: 10, numbers: true });
+    }
 
     const member = await Member.create(req.body);
 
@@ -72,31 +77,33 @@ exports.createMember = asyncHandler(async (req, res, next) => {
     });
   } catch (err) {
     if (err.code === 11000) {
-      let member = await Member.findOne({
+      const member = await Member.findOne({
         phone: req.body.phone,
         organizations: req.params.organizationId,
       });
 
+      // allow an existing member to be added by a new organization with thesame phone number
       if (!member) {
-        member = await Member.findOneAndUpdate(
+        const updatedMember = await Member.findOneAndUpdate(
           { phone: req.body.phone },
           { $addToSet: { organizations: req.params.organizationId } },
           { new: true }
         );
 
-        return res.status(201).json({
+        return res.status(200).json({
           success: true,
-          data: member,
+          message: `Exisitng member with the ID: ${updatedMember._id} has been added to ${organization.name}`,
         });
       }
 
       return next(
         new ErrorResponse(
-          `Member with the ID: ${member._id} already exists`,
+          'The phone number provided has already been used to register a member in this organization',
           403
         )
       );
     }
+    return next(err);
   }
 });
 
@@ -202,4 +209,13 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
  */
 exports.resetPassword = asyncHandler(async (req, res, next) => {
   changePassword(Member, req, res, next);
+});
+
+/**
+ * @description Avatar upload for member
+ * @route POST /api/v1/members/avatar
+ * @access Private (member)
+ */
+exports.avatarUpload = asyncHandler(async (req, res, next) => {
+  uploadAvatar(req, res, next);
 });

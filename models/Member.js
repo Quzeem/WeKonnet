@@ -1,6 +1,5 @@
 const crypto = require('crypto');
 const mongoose = require('mongoose');
-const generator = require('generate-password');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -26,7 +25,6 @@ const MemberSchema = new mongoose.Schema(
       ],
       trim: true,
       lowercase: true,
-      unique: true,
     },
     phone: {
       type: String,
@@ -84,17 +82,6 @@ const MemberSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
-MemberSchema.pre('save', function (next) {
-  const member = this;
-  if (!member.email) {
-    member.email = `${member.firstname}${member.phone.slice(-4)}@domain.com`;
-  }
-  if (!member.password) {
-    member.password = generator.generate({ length: 10, numbers: true });
-  }
-  next();
-});
 
 // Delete some fiels from data to return to the client
 MemberSchema.methods.toJSON = function () {

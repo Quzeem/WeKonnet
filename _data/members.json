@@ -4,6 +4,8 @@
     "firstname": "Abiola",
     "lastname": "Kosemani",
     "phone": "07022222470",
+    "email": "kosemani@gmail.com",
+    "password": "123456",
     "location": {
       "address": "No man's land",
       "state": "Lagos",
@@ -18,8 +20,8 @@
     "lastname": "Agbaje",
     "phone": "08022226311",
     "email": "zeemag@gmail.com",
-    "organizations": "5f634be3d7f84d2bf0aaed14",
-    "password": "zeemag"
+    "password": "123456",
+    "organizations": "5f634be3d7f84d2bf0aaed14"
   },
   {
     "_id": "5f63898674698d2b1c4aa3a2",
@@ -27,14 +29,16 @@
     "lastname": "Ugbem",
     "phone": "08022224668",
     "email": "job@gmail.com",
-    "organizations": "5f6333d056011508d813814c",
-    "password": "jobzil"
+    "password": "123456",
+    "organizations": "5f6333d056011508d813814c"
   },
   {
     "_id": "5f6389cc74698d2b1c4aa3a3",
     "firstname": "Marley",
     "lastname": "Athan",
     "phone": "08022221111",
+    "email": "Athan@gmail.com",
+    "password": "123456",
     "location": {
       "address": "No man's land",
       "state": "Lagos",
@@ -48,6 +52,8 @@
     "firstname": "Mark",
     "lastname": "Henry",
     "phone": "09033333472",
+    "email": "mark@gmail.com",
+    "password": "123456",
     "organizations": "5f663165fff5d319d831d9df"
   }
 ]

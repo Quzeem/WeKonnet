@@ -28,6 +28,12 @@ const errorHandler = (err, req, res, next) => {
     error = new ErrorResponse(message, 400);
   }
 
+  // File upload error
+  if (err.message === 'File too large') {
+    const message = 'Please upload a file less than 1MB';
+    error = new ErrorResponse(message, 400);
+  }
+
   res.status(error.statusCode || 500).json({
     success: false,
     error: error.message || 'Server Error',

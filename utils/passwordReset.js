@@ -23,7 +23,7 @@ exports.sendPasswordResetLink = async (model, req, res, next) => {
       );
     }
   }
-  console.log(user);
+
   // Get original reset token
   const resetToken = user.getResetPasswordToken();
 
