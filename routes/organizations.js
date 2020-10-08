@@ -4,7 +4,7 @@ const {
   getOrganization,
   deleteOrganization,
   getLoggedInOrganization,
-  avatarUpload,
+  uploadAvatar,
   updateOrganizationDetails,
   updateOrganizationPassword,
   forgotPassword,
@@ -34,13 +34,9 @@ router
   );
 
 router.get('/me', auth, authorize('organization'), getLoggedInOrganization);
-router.post(
-  '/avatar',
-  auth,
-  authorize('organization'),
-  upload.single('image'),
-  avatarUpload
-);
+router
+  .route('/avatar')
+  .post(auth, authorize('organization'), upload.single('image'), uploadAvatar);
 router.put(
   '/updatedetails',
   auth,

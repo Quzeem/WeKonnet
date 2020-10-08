@@ -28,8 +28,12 @@ const MemberSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
+      match: [
+        /^\+[1-9]\d{1,14}$/,
+        'Please provide phone number in E.164 format starting with a ‘+’',
+      ],
       required: [true, 'Please add a phone number'],
-      maxlength: [20, 'Phone number can not be longer than 20 characters'],
+      maxlength: [15, 'Phone number can not be longer than 15 characters'],
       unique: true,
     },
     professionalSkills: {
@@ -44,8 +48,10 @@ const MemberSchema = new mongoose.Schema(
     },
     photo: {
       type: String,
-      default: 'no-photo.jpg',
+      default:
+        'https://res.cloudinary.com/zeemag/image/upload/v1601946625/konnet/no-avatar_a5icj4.png',
     },
+    photoId: String,
     stateOfOrigin: String,
     location: {
       address: String,

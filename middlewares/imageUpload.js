@@ -4,12 +4,7 @@ const ErrorResposne = require('../utils/errorResponse');
 require('dotenv').config({ path: '../config/config.env' });
 
 // set storage engine
-const storage = multer.diskStorage({
-  destination: 'images',
-  filename(req, file, cb) {
-    cb(null, `${Date.now()}_${file.originalname}`);
-  },
-});
+const storage = multer.memoryStorage();
 
 // Set fileSize limit - 1MB
 const limits = {

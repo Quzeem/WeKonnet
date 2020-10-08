@@ -58,12 +58,18 @@ const OrganizationSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      maxlength: [20, 'Phone number can not be longer than 20 characters'],
+      match: [
+        /^\+[1-9]\d{1,14}$/,
+        'Please provide the number in E.164 format starting with a ‘+’',
+      ],
+      maxlength: [15, 'Phone number can not be longer than 15 characters'],
     },
     photo: {
       type: String,
-      default: 'no-photo.jpg',
+      default:
+        'https://res.cloudinary.com/zeemag/image/upload/v1601946625/konnet/no-avatar_a5icj4.png',
     },
+    photoId: String,
     role: {
       type: String,
       default: 'organization',

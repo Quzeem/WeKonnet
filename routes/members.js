@@ -5,7 +5,7 @@ const {
   createMember,
   deleteMember,
   getLoggedInMember,
-  avatarUpload,
+  uploadAvatar,
   updateMemberDetails,
   updateMemberPassword,
   forgotPassword,
@@ -33,13 +33,9 @@ router
   .post(auth, authorize('admin', 'organization'), createMember);
 
 router.get('/me', auth, authorize('member'), getLoggedInMember);
-router.post(
-  '/avatar',
-  auth,
-  authorize('member'),
-  upload.single('image'),
-  avatarUpload
-);
+router
+  .route('/avatar')
+  .post(auth, authorize('member'), upload.single('image'), uploadAvatar);
 router.put('/updatedetails', auth, authorize('member'), updateMemberDetails);
 router.put('/updatepassword', auth, authorize('member'), updateMemberPassword);
 router.post('/forgotpassword', forgotPassword);

@@ -7,7 +7,7 @@ const {
   sendPasswordResetLink,
   changePassword,
 } = require('../utils/passwordReset');
-const uploadAvatar = require('../utils/uploadAvatar');
+const { uploadAvatar } = require('../utils/avatar');
 
 /**
  * @description Get all organizations
@@ -146,8 +146,8 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 /**
  * @description Avatar upload for organization
  * @route POST /api/v1/organizations/avatar
- * @access Private (member)
+ * @access Private (organization)
  */
-exports.avatarUpload = asyncHandler(async (req, res, next) => {
+exports.uploadAvatar = asyncHandler(async (req, res, next) => {
   uploadAvatar(req, res, next);
 });
