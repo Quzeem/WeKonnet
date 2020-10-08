@@ -9,6 +9,7 @@ const {
   changePassword,
 } = require('../utils/passwordReset');
 const { uploadAvatar } = require('../utils/avatar');
+const sendEmail = require('../utils/sendEmail');
 
 /**
  * @description Get all members
@@ -179,7 +180,8 @@ exports.updateMemberDetails = asyncHandler(async (req, res, next) => {
  * @access Private (member)
  */
 exports.updateMemberPassword = asyncHandler(async (req, res, next) => {
-  const member = await Member.findById(req.user._id).select('+password');
+  // const member = await Member.findById(req.user._id).select('+password');
+  const member = await Member.findById(req.user._id);
 
   // Check current password
   if (!(await member.verifyPassword(req.body.currentPassword))) {
@@ -218,4 +220,81 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
  */
 exports.uploadAvatar = asyncHandler(async (req, res, next) => {
   uploadAvatar(req, res, next);
+});
+
+/**
+ * @description Message a member
+ * @route POST /api/v1/members/message/single
+ * @access Private (organization & member)
+ */
+exports.messageMember = asyncHandler(async (req, res, next) => {
+  const { subject, text, email } = req.body;
+
+  if (!subject || !text || !email) {
+    return next(
+      new ErrorResponse(
+        'Please provide the message subject, text, and member email',
+        400
+      )
+    );
+  }
+
+  try {
+    let senderName;
+    if (req.user.role === 'organization') {
+      senderName = req.user.name;
+    } else if (req.user.role === 'member') {
+      senderName = `${req.user.firstname} ${req.user.lastname}`;
+    }
+
+    // sending email
+    await sendEmail({
+      sender: `${senderName} <${req.user.email}>`,
+      receiver: req.body.email,
+      subject: req.body.subject,
+      body: req.body.text,
+    });
+    // send response
+    return res.status(200).json({ success: true, message: 'Email sent' });
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(500)
+      .json({ success: false, message: 'Email could not be sent' });
+  }
+});
+
+/**
+ * @description Message all members
+ * @route POST /api/v1/members/message/all
+ * @access Private (organization)
+ */
+exports.messageMembers = asyncHandler(async (req, res, next) => {
+  const { subject, text } = req.body;
+
+  if (!subject || !text) {
+    return next(
+      new ErrorResponse('Please provide the message subject and text', 400)
+    );
+  }
+  // Get all members email
+  const emails = await Member.find({ organizations: req.user._id }).distinct(
+    'email'
+  );
+
+  try {
+    // sending email
+    await sendEmail({
+      sender: `${req.user.name} <${req.user.email}>`,
+      receiver: emails,
+      subject: req.body.subject,
+      body: req.body.text,
+    });
+    // send response
+    return res.status(200).json({ success: true, message: 'Email sent' });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, message: 'Email could not be sent' });
+  }
 });

@@ -72,7 +72,7 @@ const MemberSchema = new mongoose.Schema(
           throw new Error('Password cannot contain "password"');
         }
       },
-      select: false,
+      // select: false,
     },
     resetPasswordToken: String,
     resetPasswordExpires: Date,

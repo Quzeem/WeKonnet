@@ -54,7 +54,8 @@ exports.sendPasswordResetLink = async (model, req, res, next) => {
   try {
     // sending email
     await sendEmail({
-      email: user.email,
+      sender: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
+      reciever: user.email,
       subject: 'Password Reset Link',
       body: message,
     });

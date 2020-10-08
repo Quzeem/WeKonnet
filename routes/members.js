@@ -10,6 +10,8 @@ const {
   updateMemberPassword,
   forgotPassword,
   resetPassword,
+  messageMember,
+  messageMembers,
 } = require('../controllers/members');
 
 const Member = require('../models/Member');
@@ -40,6 +42,18 @@ router.put('/updatedetails', auth, authorize('member'), updateMemberDetails);
 router.put('/updatepassword', auth, authorize('member'), updateMemberPassword);
 router.post('/forgotpassword', forgotPassword);
 router.put('/resetpassword/:resettoken', resetPassword);
+router.post(
+  '/message/single',
+  auth,
+  authorize('admin', 'organization', 'member'),
+  messageMember
+);
+router.post(
+  '/message/all',
+  auth,
+  authorize('admin', 'organization'),
+  messageMembers
+);
 
 router
   .route('/:memberId')

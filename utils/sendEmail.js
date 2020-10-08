@@ -13,8 +13,8 @@ const sendEmail = async (options) => {
 
   // Transport object
   const message = {
-    from: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
-    to: options.email,
+    from: options.sender,
+    to: options.receiver,
     subject: options.subject,
     text: options.body,
   };
