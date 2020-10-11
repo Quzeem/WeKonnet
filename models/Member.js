@@ -72,7 +72,6 @@ const MemberSchema = new mongoose.Schema(
           throw new Error('Password cannot contain "password"');
         }
       },
-      // select: false,
     },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
@@ -80,7 +79,7 @@ const MemberSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Organization',
-        required: true,
+        required: [true, 'Organization ID is required'],
       },
     ],
   },

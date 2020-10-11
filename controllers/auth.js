@@ -66,7 +66,7 @@ exports.loginMember = asyncHandler(async (req, res, next) => {
   }
 
   // Check if member exists
-  const member = await Member.findOne({ phone }).select('+password');
+  const member = await Member.findOne({ phone });
 
   // Validate member
   if (!member) {

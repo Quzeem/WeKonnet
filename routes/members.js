@@ -3,6 +3,7 @@ const {
   getMembers,
   getMember,
   createMember,
+  registerMembersWithCSV,
   deleteMember,
   getLoggedInMember,
   uploadAvatar,
@@ -17,7 +18,8 @@ const {
 const Member = require('../models/Member');
 const advancedQuery = require('../middlewares/advancedQuery');
 const { auth, authorize } = require('../middlewares/auth');
-const upload = require('../middlewares/imageUpload');
+const imageUpload = require('../middlewares/imageUpload');
+const csvUpload = require('../middlewares/csvUpload');
 
 const router = express.Router({ mergeParams: true });
 
@@ -34,10 +36,18 @@ router
   )
   .post(auth, authorize('admin', 'organization'), createMember);
 
+router.post(
+  '/csv/upload',
+  auth,
+  authorize('organization'),
+  csvUpload.single('csv'),
+  registerMembersWithCSV
+);
+
 router.get('/me', auth, authorize('member'), getLoggedInMember);
 router
   .route('/avatar')
-  .post(auth, authorize('member'), upload.single('image'), uploadAvatar);
+  .post(auth, authorize('member'), imageUpload.single('image'), uploadAvatar);
 router.put('/updatedetails', auth, authorize('member'), updateMemberDetails);
 router.put('/updatepassword', auth, authorize('member'), updateMemberPassword);
 router.post('/forgotpassword', forgotPassword);

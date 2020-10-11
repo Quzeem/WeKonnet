@@ -1,4 +1,6 @@
+const { EventEmitter } = require('events');
 const generator = require('generate-password');
+const csv = require('fast-csv');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middlewares/asyncHandler');
 const Member = require('../models/Member');
@@ -91,6 +93,15 @@ exports.createMember = asyncHandler(async (req, res, next) => {
           { new: true }
         );
 
+        if (!updatedMember) {
+          return next(
+            new ErrorResponse(
+              `Member with the phone ${req.body.phone} not found`
+            ),
+            404
+          );
+        }
+
         return res.status(200).json({
           success: true,
           message: `Exisitng member with the ID: ${updatedMember._id} has been added to ${organization.name}`,
@@ -105,6 +116,109 @@ exports.createMember = asyncHandler(async (req, res, next) => {
       );
     }
     return next(err);
+  }
+});
+
+/**
+ * @description Bulk registrastion of members with a csv file
+ * @route POST /api/v1/organizations/:organizationId/members/csv/upload
+ * @access Private (organization)
+ */
+exports.registerMembersWithCSV = asyncHandler(async (req, res, next) => {
+  // Check if organization exists
+  const organization = await Organization.findById(req.params.organizationId);
+
+  if (!organization) {
+    return next(
+      new ErrorResponse(
+        `Organization with the ID: ${req.params.organizationId} not found`
+      ),
+      404
+    );
+  }
+
+  if (!req.file) {
+    return next(new ErrorResponse('Please upload a file', 400));
+  }
+
+  const membersFile = req.file;
+
+  const members = [];
+
+  const options = {
+    headers: true,
+    discardUnmappedColumns: true,
+    quote: null,
+    ignoreEmpty: true,
+    trim: true,
+  };
+
+  try {
+    csv
+      .parseString(membersFile.buffer.toString(), options)
+      .on('data', (memberStream) => {
+        const memberObject = memberStream;
+        memberObject.organizations = [req.params.organizationId];
+        memberObject.password = generator.generate({
+          length: 10,
+          numbers: true,
+        });
+        members.push(memberObject);
+      })
+      .on('end', async () => {
+        const totalProcessCounter = members.length;
+        let currentProcessCount = 0;
+
+        // Create an instance(object) from EventEmitter
+        const emitter = new EventEmitter();
+
+        emitter.on('done', async () => {
+          if (totalProcessCounter === currentProcessCount) {
+            res
+              .status(201)
+              .json({ success: true, message: 'Members successfully added.' });
+          }
+        });
+
+        // FOR EACH STARTS
+        members.forEach(async (member) => {
+          try {
+            await Member.create(member);
+            // SEND SMS INCLUDING PHONE AND PASSOWRD TO FIRST TIME MEMBERS
+            ++currentProcessCount;
+            return emitter.emit('done');
+          } catch (err) {
+            if (err.code === 11000) {
+              const memberDoc = await Member.findOne({
+                phone: member.phone,
+                organizations: req.params.organizationId,
+              });
+
+              // allow an existing member to be added by a new organization with the same phone number
+              if (!memberDoc) {
+                await Member.findOneAndUpdate(
+                  { phone: member.phone },
+                  { $addToSet: { organizations: req.params.organizationId } },
+                  { new: true }
+                );
+                // SEND SMS TO NOTIFY MEMBERS ABOUT THE NEW ORGANIZATION
+                ++currentProcessCount;
+                return emitter.emit('done');
+              }
+
+              // same organization trying to member(s) with existing phone(s).
+              ++currentProcessCount;
+              return emitter.emit('done');
+            }
+
+            return next(err);
+          }
+        });
+        // FOR EACH ENDS
+      });
+  } catch (err) {
+    console.error(err);
+    return next(new ErrorResponse('Something went wrong', 500));
   }
 });
 
