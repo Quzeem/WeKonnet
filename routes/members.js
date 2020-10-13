@@ -13,6 +13,7 @@ const {
   resetPassword,
   messageMember,
   messageMembers,
+  searchMembers,
 } = require('../controllers/members');
 
 const Member = require('../models/Member');
@@ -64,7 +65,7 @@ router.post(
   authorize('admin', 'organization'),
   messageMembers
 );
-
+router.get('/search', auth, searchMembers);
 router
   .route('/:memberId')
   .get(auth, authorize('admin', 'organization', 'member'), getMember)

@@ -12,6 +12,7 @@ const {
 } = require('../utils/passwordReset');
 const { uploadAvatar } = require('../utils/avatar');
 const sendEmail = require('../utils/sendEmail');
+const search = require('../utils/search');
 
 /**
  * @description Get all members
@@ -411,4 +412,13 @@ exports.messageMembers = asyncHandler(async (req, res, next) => {
       .status(500)
       .json({ success: false, message: 'Email could not be sent' });
   }
+});
+
+/**
+ * @description Search for members in a specific organization
+ * @route GET /api/v1/members/search?name=job
+ * @access Private
+ */
+exports.searchMembers = asyncHandler(async (req, res, next) => {
+  search(req, res, next);
 });
