@@ -17,10 +17,10 @@ const {
 } = require('../controllers/members');
 
 const Member = require('../models/Member');
-const advancedQuery = require('../middlewares/advancedQuery');
-const { auth, authorize } = require('../middlewares/auth');
-const imageUpload = require('../middlewares/imageUpload');
-const csvUpload = require('../middlewares/csvUpload');
+const advancedQuery = require('../middleware/advancedQuery');
+const { auth, authorize } = require('../middleware/auth');
+const imageUpload = require('../middleware/imageUpload');
+const csvUpload = require('../middleware/csvUpload');
 
 const router = express.Router({ mergeParams: true });
 
@@ -40,7 +40,7 @@ router
 router.post(
   '/csv/upload',
   auth,
-  authorize('organization'),
+  authorize('admin', 'organization'),
   csvUpload.single('csv'),
   registerMembersWithCSV
 );

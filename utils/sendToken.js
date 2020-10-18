@@ -1,6 +1,6 @@
 require('dotenv').config({ path: '../config/config.env' });
 
-// Custom function which sets token for a user, put the token in a cookie, and send a response
+// Custom function which sets token for a user, puts the token in a cookie, and sends a response
 const sendToken = async (user, statusCode, res) => {
   // Create token
   const token = await user.getAuthToken();

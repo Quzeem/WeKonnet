@@ -40,7 +40,7 @@ exports.sendPasswordResetLink = async (model, req, res, next) => {
     )}/api/v1/organizations/resetpassword/${resetToken}`;
 
     // Message body
-    message = `Hello,\n\n ${user.name}, \n\n\n You are receiving this email because you (or someone else) has requested the reset of a password.\n\n Please visit the link below to reset your password: \n\n ${resetUrl} \n\n\n If you did not make this request, kindly ignore this email. \n\n\n\n Cheers, \n\n Konnet`;
+    message = `Hello,\n\n ${user.name}, \n\n\n You are receiving this email because you (or someone else) has requested the reset of a password.\n\n Please visit the link below to reset your password: \n\n ${resetUrl} \n\n\n If you did not make this request, kindly ignore this email. \n\n\n\n Cheers, \n\n WEkonnet`;
   } else if (model === mongoose.model('Member')) {
     // Create reset password url
     const resetUrl = `${req.protocol}://${req.get(
@@ -48,14 +48,14 @@ exports.sendPasswordResetLink = async (model, req, res, next) => {
     )}/api/v1/members/resetpassword/${resetToken}`;
 
     // Message body
-    message = `Hi ${user.firstname} ${user.lastname}, \n\n\n You are receiving this email because you (or someone else) has requested the reset of a password.\n\n Please visit the link below to reset your password: \n\n ${resetUrl} \n\n\n If you did not make this request, kindly ignore this email. \n\n\n\n Cheers, \n\n Konnet`;
+    message = `Hi ${user.firstname} ${user.lastname}, \n\n\n You are receiving this email because you (or someone else) has requested the reset of a password.\n\n Please visit the link below to reset your password: \n\n ${resetUrl} \n\n\n If you did not make this request, kindly ignore this email. \n\n\n\n Cheers, \n\n WEkonnet`;
   }
 
   try {
     // sending email
     await sendEmail({
       sender: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
-      reciever: user.email,
+      receiver: user.email,
       subject: 'Password Reset Link',
       body: message,
     });
@@ -67,6 +67,7 @@ exports.sendPasswordResetLink = async (model, req, res, next) => {
     user.resetPasswordExpires = undefined;
 
     await user.save({ validateBeforeSave: false });
+    console.error(err);
 
     return next(new ErrorResponse('Email could not be sent', 500));
   }

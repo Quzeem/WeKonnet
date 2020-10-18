@@ -1,8 +1,9 @@
 const { EventEmitter } = require('events');
 const generator = require('generate-password');
 const csv = require('fast-csv');
+const webpush = require('web-push');
 const ErrorResponse = require('../utils/errorResponse');
-const asyncHandler = require('../middlewares/asyncHandler');
+const asyncHandler = require('../middleware/asyncHandler');
 const Member = require('../models/Member');
 const Organization = require('../models/Organization');
 const sendToken = require('../utils/sendToken');
@@ -75,6 +76,8 @@ exports.createMember = asyncHandler(async (req, res, next) => {
 
     const member = await Member.create(req.body);
 
+    // Send login credentials via SMS
+
     return res.status(201).json({
       success: true,
       data: member,
@@ -86,7 +89,7 @@ exports.createMember = asyncHandler(async (req, res, next) => {
         organizations: req.params.organizationId,
       });
 
-      // allow an existing member to be added by a new organization with thesame phone number
+      // allow an existing member to be added by a new organization with the same phone number
       if (!member) {
         const updatedMember = await Member.findOneAndUpdate(
           { phone: req.body.phone },
@@ -112,7 +115,7 @@ exports.createMember = asyncHandler(async (req, res, next) => {
       return next(
         new ErrorResponse(
           'The phone number provided has already been used to register a member in this organization',
-          403
+          400
         )
       );
     }
@@ -181,11 +184,11 @@ exports.registerMembersWithCSV = asyncHandler(async (req, res, next) => {
           }
         });
 
-        // FOR EACH STARTS
+        // forEach starts here
         members.forEach(async (member) => {
           try {
             await Member.create(member);
-            // SEND SMS INCLUDING PHONE AND PASSOWRD TO FIRST TIME MEMBERS
+            // Send login credentials via SMS
             ++currentProcessCount;
             return emitter.emit('done');
           } catch (err) {
@@ -202,7 +205,7 @@ exports.registerMembersWithCSV = asyncHandler(async (req, res, next) => {
                   { $addToSet: { organizations: req.params.organizationId } },
                   { new: true }
                 );
-                // SEND SMS TO NOTIFY MEMBERS ABOUT THE NEW ORGANIZATION
+                // Send notification email to the existing members
                 ++currentProcessCount;
                 return emitter.emit('done');
               }
@@ -215,17 +218,16 @@ exports.registerMembersWithCSV = asyncHandler(async (req, res, next) => {
             return next(err);
           }
         });
-        // FOR EACH ENDS
+        // forEach ends here
       });
   } catch (err) {
-    console.error(err);
     return next(new ErrorResponse('Something went wrong', 500));
   }
 });
 
 /**
  * @description Delete member
- * @route DELETE /api/v1/members/:memberId
+ * @route DELETE /api/v1/members/:memberId?organizationId=
  * @access Private (organization)
  */
 exports.deleteMember = asyncHandler(async (req, res, next) => {
@@ -261,7 +263,7 @@ exports.deleteMember = asyncHandler(async (req, res, next) => {
  */
 exports.getLoggedInMember = asyncHandler(async (req, res, next) => {
   const member = await Member.findById(req.user._id);
-  res.status(200).json({ success: true, data: member });
+  return res.status(200).json({ success: true, data: member });
 });
 
 /**
@@ -275,6 +277,7 @@ exports.updateMemberDetails = asyncHandler(async (req, res, next) => {
     lastname: req.body.lastname,
     email: req.body.email,
     phone: req.body.phone,
+    dateOfBirth: req.body.dateOfBirth,
     professionalSkills: req.body.professionalSkills,
     gender: req.body.gender,
     stateOfOrigin: req.body.stateOfOrigin,
@@ -286,7 +289,7 @@ exports.updateMemberDetails = asyncHandler(async (req, res, next) => {
     runValidators: true,
   });
 
-  res.status(200).json({ success: true, data: member });
+  return res.status(200).json({ success: true, data: member });
 });
 
 /**
@@ -295,7 +298,6 @@ exports.updateMemberDetails = asyncHandler(async (req, res, next) => {
  * @access Private (member)
  */
 exports.updateMemberPassword = asyncHandler(async (req, res, next) => {
-  // const member = await Member.findById(req.user._id).select('+password');
   const member = await Member.findById(req.user._id);
 
   // Check current password
@@ -372,7 +374,6 @@ exports.messageMember = asyncHandler(async (req, res, next) => {
     // send response
     return res.status(200).json({ success: true, message: 'Email sent' });
   } catch (err) {
-    console.error(err);
     return res
       .status(500)
       .json({ success: false, message: 'Email could not be sent' });
@@ -396,6 +397,10 @@ exports.messageMembers = asyncHandler(async (req, res, next) => {
   const emails = await Member.find({ organizations: req.user._id }).distinct(
     'email'
   );
+
+  if (emails.length === 0) {
+    return next(new ErrorResponse('Members not found', 404));
+  }
 
   try {
     // sending email

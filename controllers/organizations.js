@@ -1,5 +1,5 @@
 const ErrorResponse = require('../utils/errorResponse');
-const asyncHandler = require('../middlewares/asyncHandler');
+const asyncHandler = require('../middleware/asyncHandler');
 const Organization = require('../models/Organization');
 const Member = require('../models/Member');
 const sendToken = require('../utils/sendToken');

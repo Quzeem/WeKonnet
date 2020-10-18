@@ -1,5 +1,5 @@
 const ErrorResponse = require('../utils/errorResponse');
-const asyncHandler = require('../middlewares/asyncHandler');
+const asyncHandler = require('../middleware/asyncHandler');
 const Organization = require('../models/Organization');
 const Member = require('../models/Member');
 const Admin = require('../models/Admin');
@@ -27,7 +27,7 @@ exports.loginOrganization = asyncHandler(async (req, res, next) => {
   // Validate username & password
   if (!username || !password) {
     return next(
-      new ErrorResponse('Please provide a username and password', 400)
+      new ErrorResponse('Please provide a username and a password', 400)
     );
   }
 

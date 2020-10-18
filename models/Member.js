@@ -36,6 +36,7 @@ const MemberSchema = new mongoose.Schema(
       maxlength: [15, 'Phone number can not be longer than 15 characters'],
       unique: true,
     },
+    dateOfBirth: String,
     professionalSkills: {
       type: String,
       trim: true,

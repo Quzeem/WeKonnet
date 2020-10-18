@@ -12,9 +12,9 @@ const {
 } = require('../controllers/organizations');
 
 const Organization = require('../models/Organization');
-const advancedQuery = require('../middlewares/advancedQuery');
-const { auth, authorize } = require('../middlewares/auth');
-const upload = require('../middlewares/imageUpload');
+const advancedQuery = require('../middleware/advancedQuery');
+const { auth, authorize } = require('../middleware/auth');
+const upload = require('../middleware/imageUpload');
 
 const router = express.Router();
 
@@ -24,14 +24,15 @@ const memberRouter = require('./members');
 // Re-route into members router
 router.use('/:organizationId/members', memberRouter);
 
-router
-  .route('/')
-  .get(
-    auth,
-    authorize('admin'),
-    advancedQuery(Organization, 'members'),
-    getOrganizations
-  );
+router.route('/').get(
+  auth,
+  authorize('admin'),
+  advancedQuery(Organization, {
+    path: 'members',
+    select: 'firstname lastname phone email',
+  }),
+  getOrganizations
+);
 
 router.get('/me', auth, authorize('organization'), getLoggedInOrganization);
 router
