@@ -4,6 +4,7 @@ const Organization = require('../models/Organization');
 const Member = require('../models/Member');
 const Admin = require('../models/Admin');
 const sendToken = require('../utils/sendToken');
+const sendEmail = require('../utils/sendEmail');
 
 /**
  * @description Register Organization
@@ -12,6 +13,13 @@ const sendToken = require('../utils/sendToken');
  */
 exports.registerOrganization = asyncHandler(async (req, res, next) => {
   const organization = await Organization.create(req.body);
+
+  await sendEmail({
+    sender: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
+    receiver: organization.email,
+    subject: 'Account Successfully Created',
+    body: `Hi ${organization.name} admin,\n\n This is to notify you that ${organization.name} organization has successfully been registered on our platform.\n\n Your login details are:\n\n\n Username: ${organization.username}\n\n Password: ${req.body.password}\n\n\n Welcome on board,\n\n WEkonnet.`,
+  });
 
   return sendToken(organization, 201, res);
 });

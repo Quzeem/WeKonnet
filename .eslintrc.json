@@ -13,6 +13,7 @@
     "no-console": "off",
     "comma-dangle": "off",
     "no-useless-escape": "off",
+    "prefer-arrow-callback": "off",
     "no-underscore-dangle": "off",
     "func-names": "off",
     "max-len": "off",

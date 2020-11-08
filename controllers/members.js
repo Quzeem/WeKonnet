@@ -1,7 +1,6 @@
 const { EventEmitter } = require('events');
 const generator = require('generate-password');
 const csv = require('fast-csv');
-const webpush = require('web-push');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/asyncHandler');
 const Member = require('../models/Member');
@@ -14,6 +13,7 @@ const {
 const { uploadAvatar } = require('../utils/avatar');
 const sendEmail = require('../utils/sendEmail');
 const search = require('../utils/search');
+const sendSMS = require('../utils/sendSMS');
 
 /**
  * @description Get all members
@@ -77,6 +77,11 @@ exports.createMember = asyncHandler(async (req, res, next) => {
     const member = await Member.create(req.body);
 
     // Send login credentials via SMS
+    const messagetext = `Hi ${member.firstname} ${member.lastname},\n\n This is to notify you that you have been added to ${organization.name} organization on our platform.\n\n Your login details are:\n\n\n Phone Number: ${member.phone}\n\n Password: ${req.body.password}\n\n\n Kindly login to view and update your details.\n\n WEkonnet`;
+
+    const { phone } = member;
+
+    await sendSMS(messagetext, phone);
 
     return res.status(201).json({
       success: true,
@@ -104,6 +109,16 @@ exports.createMember = asyncHandler(async (req, res, next) => {
             ),
             404
           );
+        }
+
+        if (updatedMember.email) {
+          // send notification email
+          await sendEmail({
+            sender: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
+            receiver: updatedMember.email,
+            subject: 'New Organization',
+            body: `Hi ${updatedMember.firstname} ${updatedMember.lastname},\n\n This is to notify you that you have been added to ${organization.name} organization on our platform.\n\n You can proceed to login with your existing details.\n\n WEkonnet`,
+          });
         }
 
         return res.status(200).json({
@@ -150,7 +165,8 @@ exports.registerMembersWithCSV = asyncHandler(async (req, res, next) => {
   const members = [];
 
   const options = {
-    headers: true,
+    headers: ['firstname', 'lastname', 'phone'],
+    renameHeaders: true,
     discardUnmappedColumns: true,
     quote: null,
     ignoreEmpty: true,
@@ -158,8 +174,13 @@ exports.registerMembersWithCSV = asyncHandler(async (req, res, next) => {
   };
 
   try {
-    csv
-      .parseString(membersFile.buffer.toString(), options)
+    const CSV_STRING = membersFile.buffer.toString();
+
+    const stream = csv
+      .parse(options)
+      .on('error', function (error) {
+        throw error;
+      })
       .on('data', (memberStream) => {
         const memberObject = memberStream;
         memberObject.organizations = [req.params.organizationId];
@@ -178,17 +199,25 @@ exports.registerMembersWithCSV = asyncHandler(async (req, res, next) => {
 
         emitter.on('done', async () => {
           if (totalProcessCounter === currentProcessCount) {
-            res
+            return res
               .status(201)
               .json({ success: true, message: 'Members successfully added.' });
           }
+          return null;
         });
 
         // forEach starts here
         members.forEach(async (member) => {
           try {
             await Member.create(member);
+
             // Send login credentials via SMS
+            const messagetext = `Hi ${member.firstname} ${member.lastname},\n\n This is to notify you that you have been added to ${organization.name} organization on our platform.\n\n Your login details are:\n\n\n Phone Number: ${member.phone}\n\n Password: ${member.password}\n\n\n Kindly login to view and update your details.\n\n WEkonnet`;
+
+            const { phone } = member;
+
+            await sendSMS(messagetext, phone);
+
             ++currentProcessCount;
             return emitter.emit('done');
           } catch (err) {
@@ -200,12 +229,22 @@ exports.registerMembersWithCSV = asyncHandler(async (req, res, next) => {
 
               // allow an existing member to be added by a new organization with the same phone number
               if (!memberDoc) {
-                await Member.findOneAndUpdate(
+                const updatedMember = await Member.findOneAndUpdate(
                   { phone: member.phone },
                   { $addToSet: { organizations: req.params.organizationId } },
                   { new: true }
                 );
-                // Send notification email to the existing members
+
+                if (updatedMember.email) {
+                  // Send notification email to the existing members
+                  await sendEmail({
+                    sender: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
+                    receiver: updatedMember.email,
+                    subject: 'New Organization',
+                    body: `Hi ${updatedMember.firstname} ${updatedMember.lastname},\n\n This is to notify you that you have been added to ${organization.name} organization on our platform.\n\n You can proceed to login with your existing details.\n\n WEkonnet`,
+                  });
+                }
+
                 ++currentProcessCount;
                 return emitter.emit('done');
               }
@@ -220,9 +259,12 @@ exports.registerMembersWithCSV = asyncHandler(async (req, res, next) => {
         });
         // forEach ends here
       });
+    stream.write(CSV_STRING);
+    stream.end();
   } catch (err) {
     return next(new ErrorResponse('Something went wrong', 500));
   }
+  return null;
 });
 
 /**
