@@ -1,4 +1,5 @@
 const request = require('postman-request');
+const logger = require('./winstonLogger');
 
 const sendSMS = (messagetext, phone) => {
   const options = {
@@ -33,10 +34,10 @@ const sendSMS = (messagetext, phone) => {
     options,
     (error, response, body) => {
       if (error) {
-        return console.error(error);
+        return logger.error(error);
       }
       const info = JSON.parse(body);
-      return console.log(info);
+      return logger(info);
     }
   );
 };

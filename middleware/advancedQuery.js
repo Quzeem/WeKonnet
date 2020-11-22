@@ -35,6 +35,9 @@ const advancedQuery = (model, populate) => async (req, res, next) => {
   if (req.query.select) {
     const fields = req.query.select.split(',').join(' ');
     query = query.select(fields);
+  } else {
+    // select all fields expect __v
+    query = query.select('-__v');
   }
 
   // Sort Documents by field(s) --- Ascending(1) or Descending(-1)

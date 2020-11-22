@@ -45,7 +45,11 @@ const MemberSchema = new mongoose.Schema(
     gender: {
       type: String,
       lowercase: true,
-      enum: ['male', 'female', 'prefer not to say'],
+      enum: {
+        values: ['male', 'female', 'prefer not to say'],
+        message:
+          'Gender can only be any of the following: male, female, prefer not to say',
+      },
     },
     photo: {
       type: String,

@@ -10,7 +10,7 @@
     "ecmaVersion": 12
   },
   "rules": {
-    "no-console": "off",
+    "no-console": "warn",
     "comma-dangle": "off",
     "no-useless-escape": "off",
     "prefer-arrow-callback": "off",
@@ -18,6 +18,8 @@
     "func-names": "off",
     "max-len": "off",
     "no-plusplus": "off",
-    "linebreak-style": ["warn", "windows"]
+    "linebreak-style": ["warn", "windows"],
+    "prefer-destructuring": ["error", { "object": true, "array": false }],
+    "no-unused-vars": ["error", { "argsIgnorePattern": "req|res|next|val" }]
   }
 }

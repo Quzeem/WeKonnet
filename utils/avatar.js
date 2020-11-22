@@ -30,8 +30,8 @@ exports.uploadAvatar = async (req, res, next) => {
     // Update user photo field & photoId
     req.user.photo = result.secure_url;
     req.user.photoId = result.public_id;
-    // save
     await req.user.save();
+
     return res.status(200).json({ success: true, data: result.secure_url });
   } catch (err) {
     return next(new ErrorResponse('Unable to upload image', 500));

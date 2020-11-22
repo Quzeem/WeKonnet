@@ -65,9 +65,7 @@ exports.sendPasswordResetLink = async (model, req, res, next) => {
   } catch (err) {
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
-
     await user.save({ validateBeforeSave: false });
-    console.error(err);
 
     return next(new ErrorResponse('Email could not be sent', 500));
   }
@@ -80,7 +78,7 @@ exports.changePassword = async (model, req, res, next) => {
     .update(req.params.resettoken)
     .digest('hex');
 
-  // find an organization with the resetPasswordToken in the DB
+  // find a user with the resetPasswordToken in the DB
   const user = await model.findOne({
     resetPasswordToken,
     resetPasswordExpires: { $gt: Date.now() },

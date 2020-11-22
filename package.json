@@ -1,7 +1,7 @@
 {
-  "name": "konnet_api",
+  "name": "wekonnet_api",
   "version": "1.0.0",
-  "description": "Konnet Backend API",
+  "description": "WEkonnet Backend API",
   "main": "server.js",
   "scripts": {
     "start": "NODE_ENV=production node server",
@@ -32,6 +32,7 @@
     "nodemailer": "^6.4.12",
     "postman-request": "^2.88.1-postman.26",
     "web-push": "^3.4.4",
+    "winston": "^3.3.3",
     "xss-clean": "^0.1.1"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
 const multer = require('multer');
-const ErrorResposne = require('../utils/errorResponse');
+const ErrorResponse = require('../utils/errorResponse');
 
 require('dotenv').config({ path: '../config/config.env' });
 
@@ -15,7 +15,7 @@ const limits = {
 const fileFilter = (req, file, cb) => {
   // Accept images only
   if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-    return cb(new ErrorResposne('Please upload an image file', 400));
+    return cb(new ErrorResponse('Please upload an image file', 400));
   }
   // else accept the file
   return cb(null, true);
