@@ -1,6 +1,6 @@
 # WEkonnet API
 
-> Backend API for WEkonnet application. An application which connects alumni of a particular organization with detailed and updated info about one another.
+> Backend API for WEkonnet application. This project is aimed at providing a platform for alumni of a particular organization to maintain the connection they have as time goes on; by providing detailed and updated info about one another.
 
 ## Usage
 
